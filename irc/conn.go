@@ -1,6 +1,8 @@
+// irc descibes the basic client functionalities of irken
 package irc
 
 import (
+	"bufio"
 	"net"
 	"time"
 )
@@ -8,7 +10,7 @@ import (
 const DEFAULT_PORT = "6667"
 
 type Conn struct {
-	// connection info
+	// sockection info
 	user string
 
 	// network utils
@@ -19,25 +21,34 @@ type Conn struct {
 	pingFreq time.Duration
 }
 
-func NewConn(addr string) (*Conn, error) {
+// NewConn takes a remote network address and a default nick.
+// It then tries to connect to the supplied address with the
+// properties of the supplied session
+func NewConn(addr string, nick string) (*Conn, error) {
 
 	addr += ":" + DEFAULT_PORT
 	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
+	sock, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		return nil, err
+	}
 
-	//io := NewReadWriter(bufio.NewReader(sock), bufio.NewWriter(sock))
+	io := bufio.NewReadWriter(bufio.NewReader(sock), bufio.NewWriter(sock))
+
+	return &Conn{nick, io, sock, time.Minute}, nil
 }
 
-func (c *IRCConn) Connect() {
+func (c *Conn) Connect() {
 	//TODO
 }
 
-func (c *IRCConn) Read() {
+func (c *Conn) Read() {
 	//TODO
 }
 
-func (c *IRCConn) Write() {
+func (c *Conn) Write() {
 	//TODO
 }
