@@ -1,6 +1,6 @@
 # Projektplan
 ## Programbeskrivning
-Programmet ska kunna koppla upp sig på populära IRC-servrar och kunna stödja grundläggande operationer i IRC-protokollet. Med hjälp av Go:s multitrådning hoppas vi också kunna implementera ett smidigt sätt att samtidigt vara uppkopplad mot flera kanaler och/eller servrar.
+Programmet ska kunna koppla upp sig på populära IRC-servrar och kunna stödja grundläggande operationer i IRC-protokollet. Med hjälp av Go:s multitrådning hoppas vi också kunna implementera ett smidigt sätt att samtidigt vara uppkopplad mot flera kanaler och/eller servrar. Programmet ska kunna läsa från konfigurationsfiler, och erbjuda ett minimalistiskt men användbart GUI. Vårt GUI ska preliminärt använda sig av GTK-biblioteket genom [go-gtk](http://mattn.github.io/go-gtk/). Biblioteket har testats av oss för grundläggande funktionalitet på en Mac OS X-dator, och är välkänt fungerande under de flesta moderna linux-distar.
 
 ## Användarbeskrivning
 Vår målgrupp är ganska vana datoranvändare som redan har viss erfarenhet av att använda andra IRC-klienter. Vi kommer dock att sikta på att implementera ett hjälpkommando som kan täcka åtminstone den grundläggande funktionaliteten.
@@ -34,6 +34,8 @@ Självklart kommer programmet att testas med både manuella och automatiska test
 * Hur fungerar IRC-protokollet och vilka delar måste stödjas för att få en någorlunda användbar klient? Kanske räcker det med att avgränsa sig.
 
 * Hur kan man på ett smidigt sätt dela upp informations-flödet? Kanaler ska visas i olika fönster, men flödet från servern är konstant och ofiltrerat. Kanaler måste kunna hållas öppna utan att de visas i ett fönster. Någon sorts buffertar som man associerar med ett fönster (som i t.ex vim) kanske är en bra lösning.
+
+* Hur gör man gränssnittet intuitivt för nya användare, men samtidigt tillräckligt lite i vägen för vana användare som föredrar kommandon?
 
 ## Arbetsplanen
 
