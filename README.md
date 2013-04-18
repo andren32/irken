@@ -1,5 +1,5 @@
 # Projektplan
-
+Hej
 ## Programbeskrivning
 Programmet ska kunna koppla upp sig på populära IRC-servrar och kunna stödja grundläggande operationer i IRC-protokollet. Med hjälp av Go:s multitrådning hoppas vi också kunna implementera ett smidigt sätt att samtidigt vara uppkopplad mot flera kanaler och/eller servrar.
 
