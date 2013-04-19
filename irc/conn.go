@@ -26,6 +26,8 @@ type Conn struct {
 // properties of the supplied session
 func NewConn(addr string, nick string) (*Conn, error) {
 
+	//TODO: check if addr already contains another port then the default port.
+
 	addr += ":" + DEFAULT_PORT
 	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 	if err != nil {
@@ -41,14 +43,14 @@ func NewConn(addr string, nick string) (*Conn, error) {
 	return &Conn{nick, io, sock, time.Minute}, nil
 }
 
-func (c *Conn) Connect() {
-	//TODO
-}
-
 func (c *Conn) Read() {
 	//TODO
 }
 
 func (c *Conn) Write() {
+	//TODO
+}
+
+func (c *Conn) Close() {
 	//TODO
 }
