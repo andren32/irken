@@ -21,3 +21,17 @@ Får du problem nu kan det vara för att go-gtk inte hittar dina X-filer. Du må
     export PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig
 
 Nu borde allt vara klart, happy hacking!
+
+### Linux (Testat med Ubuntu 12.10 64-bit)
+
+Installera Go, i Ubuntu kan du med enkelhet göra detta genom att skriva följande i terminalen:
+
+     sudo apt-get install golang
+
+Installera gnome-devel genom att skriva följande i terminalen:
+
+     sudo apt-get install gnome-devel
+
+Följ [instruktionerna för go](http://golang.org/doc/code.html) och sätt upp en GOPATH. Nu installerar du [bindings](https://github.com/mattn/go-gtk/) för go till gtk genom:
+
+    go get github.com/mattn/go-gtk/gtk
