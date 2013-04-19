@@ -10,7 +10,7 @@ Irken använder sig av ett ramverk som heter GTK, vilket du måste ha installera
 
 Börja med att installera Xcode med tillhörande kommando-verktyg. GTK använder sig av X, så du måste också installera [XQuartz](http://xquartz.macosforge.org/landing/). Installera sedan [homebrew](http://mxcl.github.io/homebrew/). Nu installerar du lätt go och GTK med:
 
-    brew install go gtk+ gtksourceview glib gdk-pixbuf cairo
+    brew install go gtk+ gtksourceview glib gdk-pixbuf cairo pango
 
 Följ [instruktionerna för go](http://golang.org/doc/code.html) och sätt upp en GOPATH. Nu installerar du [bindings](https://github.com/mattn/go-gtk/) för go till gtk genom:
 
