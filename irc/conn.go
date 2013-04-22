@@ -10,8 +10,8 @@ import (
 const DEFAULT_PORT = "6667"
 
 type Conn struct {
-	// sockection info
-	user string
+	// user info
+	nick string
 
 	// network utils
 	io   *bufio.ReadWriter
@@ -43,14 +43,29 @@ func NewConn(addr string, nick string) (*Conn, error) {
 	return &Conn{nick, io, sock, time.Minute}, nil
 }
 
-func (c *Conn) Read() {
-	//TODO
+// Read attempts to read from the connected server and puts the data into io buffer.
+// It will wait until it gets one line of a string.
+func (c *Conn) Read() (string, error){
+	data, err := c.io.ReadString('\n')
+	return data, err
 }
 
-func (c *Conn) Write() {
-	//TODO
+// Write attempts to write a string into the io buffer and
+// flushes it, sending the data to the connected server
+func (c *Conn) Write(s string) error{
+	_, err := c.io.WriteString(s + "\r\n")
+	if err != nil {
+		return err
+	}
+	err = c.io.Flush()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
+// Close attempts to close the connection to the server
 func (c *Conn) Close() {
-	//TODO
+	c.sock.Close()
 }
