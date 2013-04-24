@@ -1,6 +1,6 @@
 // session describes the current properties associated with the
 // execution of irken
-package session
+package client
 
 import "irken/irc"
 
