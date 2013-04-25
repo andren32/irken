@@ -45,14 +45,14 @@ func NewConn(addr string, nick string) (*Conn, error) {
 
 // Read attempts to read from the connected server and puts the data into io buffer.
 // It will wait until it gets one line of a string.
-func (c *Conn) Read() (string, error){
+func (c *Conn) Read() (string, error) {
 	data, err := c.io.ReadString('\n')
 	return data, err
 }
 
 // Write attempts to write a string into the io buffer and
 // flushes it, sending the data to the connected server
-func (c *Conn) Write(s string) error{
+func (c *Conn) Write(s string) error {
 	_, err := c.io.WriteString(s + "\r\n")
 	if err != nil {
 		return err
