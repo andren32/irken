@@ -4,6 +4,7 @@ package irc
 import (
 	"bufio"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -47,7 +48,7 @@ func NewConn(addr string, nick string) (*Conn, error) {
 // It will wait until it gets one line of a string.
 func (c *Conn) Read() (string, error) {
 	data, err := c.io.ReadString('\n')
-	return data, err
+	return strings.Replace(data, "\n", "", -1), err
 }
 
 // Write attempts to write a string into the io buffer and
