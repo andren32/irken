@@ -1,29 +1,25 @@
 package client
 
 import (
+	"errors"
 	"strings"
 )
 
-// 
-func ParseInData(data string) string {
-	if strings.HasPrefix(data, ":") {
-		senderEnd := strings.Index(data, " ")
-		sender := data[1 : senderEnd-1]
-		return sender
-	}
-	return ""
-}
-
 // LexIRC scans a IRC message and outputs its tokens.
-func LexIRC(data string) (prefix string, command string, params []string,
-	err error) {
+func LexIRC(data string) (prefix, command string, params []string, err error) {
 
-	var prefixEnd int
+	// grab prefix if present
+	prefixEnd := -1
 	if strings.HasPrefix(data, ":") {
-		prefixEnd := strings.Index(data, " ")
+		prefixEnd = strings.Index(data, " ")
+		if prefixEnd == -1 {
+			err = errors.New("Message with only a prefix")
+			return
+		}
 		prefix = data[1:prefixEnd]
 	}
 
+	// grab trailing param if present
 	var trailing string
 	trailingStart := strings.Index(data, " :")
 	if trailingStart >= 0 {
@@ -32,15 +28,19 @@ func LexIRC(data string) (prefix string, command string, params []string,
 		trailingStart = len(data)
 	}
 
-	tmp := data[prefixEnd+1 : trailingStart-prefixEnd]
+	tmp := data[prefixEnd+1 : trailingStart]
 	cmdAndParams := strings.Fields(tmp)
+	if len(cmdAndParams) < 1 {
+		err = errors.New("Cannot lex command")
+		return
+	}
 
-	_ = cmdAndParams
-	_ = trailing
+	command = cmdAndParams[0]
+	params = cmdAndParams[1:]
+	if trailing != "" {
+		params = append(params, trailing)
+	}
+
 	return
 
-}
-
-func ParseOutData(data string) string {
-	return ""
 }

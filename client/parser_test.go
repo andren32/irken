@@ -11,11 +11,11 @@ func TestLexValid(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	check(t, "prefix", prefix)
-	check(t, "COMMAND", command)
-	check(t, "param1", params[0])
-	check(t, "param2", params[1])
-	check(t, "param 3 :-) yeah!?", params[2])
+	check(t, prefix, "prefix")
+	check(t, command, "COMMAND")
+	check(t, params[0], "param1")
+	check(t, params[1], "param2")
+	check(t, params[2], "param 3 :-) yeah!?")
 }
 
 func TestLexInValid(t *testing.T) {
@@ -26,8 +26,8 @@ func TestLexInValid(t *testing.T) {
 	}
 }
 
-func check(t *testing.T, exp, res interface{}) {
-	if mess, diff := test.Diff(exp, res); diff {
+func check(t *testing.T, res, exp interface{}) {
+	if mess, diff := test.Diff(res, exp); diff {
 		t.Errorf("%s", mess)
 	}
 
