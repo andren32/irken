@@ -26,6 +26,19 @@ func TestLexInValid(t *testing.T) {
 	}
 }
 
+func TestLexNoParams(t *testing.T) {
+	message := "COMMAND"
+	prefix, command, params, err := LexIRC(message)
+	if err != nil {
+		t.Error(err)
+	}
+	check(t, prefix, "")
+	check(t, command, "COMMAND")
+	if len(params) != 0 {
+		t.Errorf("Reported fake parameters")
+	}
+}
+
 func check(t *testing.T, res, exp interface{}) {
 	if mess, diff := test.Diff(res, exp); diff {
 		t.Errorf("%s", mess)
