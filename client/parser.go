@@ -42,5 +42,4 @@ func LexIRC(data string) (prefix, command string, params []string, err error) {
 	}
 
 	return
-
 }

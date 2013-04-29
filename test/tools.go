@@ -5,6 +5,7 @@ package test
 import (
 	"fmt"
 	"sort"
+	"testing"
 )
 
 // Checks if res and exp are different.
@@ -54,4 +55,11 @@ func ArrayEq(a, b []int) bool {
 		}
 	}
 	return true
+}
+
+func Check(t *testing.T, res, exp interface{}) {
+	if mess, diff := Diff(res, exp); diff {
+		t.Errorf("%s", mess)
+	}
+
 }

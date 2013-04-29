@@ -11,11 +11,11 @@ func TestLexValid(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	check(t, prefix, "prefix")
-	check(t, command, "COMMAND")
-	check(t, params[0], "param1")
-	check(t, params[1], "param2")
-	check(t, params[2], "param 3 :-) yeah!?")
+	test.Check(t, prefix, "prefix")
+	test.Check(t, command, "COMMAND")
+	test.Check(t, params[0], "param1")
+	test.Check(t, params[1], "param2")
+	test.Check(t, params[2], "param 3 :-) yeah!?")
 }
 
 func TestLexInValid(t *testing.T) {
@@ -32,16 +32,9 @@ func TestLexNoParams(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	check(t, prefix, "")
-	check(t, command, "COMMAND")
+	test.Check(t, prefix, "")
+	test.Check(t, command, "COMMAND")
 	if len(params) != 0 {
 		t.Errorf("Reported fake parameters")
 	}
-}
-
-func check(t *testing.T, res, exp interface{}) {
-	if mess, diff := test.Diff(res, exp); diff {
-		t.Errorf("%s", mess)
-	}
-
 }
