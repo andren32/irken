@@ -47,10 +47,14 @@ func TestLexNoParams(t *testing.T) {
 
 func TestJoin(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com JOIN #chan"
-	res := ParseServerMsg(input)
-	exp := "_mrx has joined #chan"
-
-	test.Check(t, res, exp)
+	msg, cont, err := ParseServerMsg(input)
+	if err != nil {
+		t.Errorf("Should parse!")
+	}
+	expMsg := "_mrx has joined #chan"
+	expCont := "#chan"
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
 }
 
 func TestMode(t *testing.T) {
@@ -58,6 +62,37 @@ func TestMode(t *testing.T) {
 }
 
 func TestQuit(t *testing.T) {
-	input := :call paste#Paste()
-	gi""
+	input := ":_mrx!blabla@haxxor.com QUIT :Later suckerz"
+	msg, cont, err := ParseServerMsg(input)
+	if err != nil {
+		t.Errorf("Should parse!")
+	}
+	expMsg := "_mrx has quit (Later suckerz)"
+	expCont := ""
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
+}
+
+func TestPart(t *testing.T) {
+	input := ":_mrx!blabla@haxxor.com PART #chan"
+	msg, cont, err := ParseServerMsg(input)
+	if err != nil {
+		t.Errorf("Should parse!")
+	}
+	expMsg := "_mrx has left #chan"
+	expCont := "#chan"
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
+}
+
+func TestPrivMsg(t *testing.T) {
+	input := ":_mrx!blabla@haxxor.com PRIVMSG #chan :Octotastic!"
+	msg, cont, err := ParseServerMsg(input)
+	if err != nil {
+		t.Errorf("Should parse!")
+	}
+	expMsg := "_mrx: Octotastic!"
+	expCont := "#chan"
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
 }

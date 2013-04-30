@@ -46,6 +46,6 @@ func lexMsg(message string) (prefix, command string, params []string, err error)
 
 // ParseServerMsg parses an IRC message from an IRC server and outputs
 // a string ready to be printed out from the client.
-func ParseServerMsg(message string) (string, error) {
-	return "", nil
+func ParseServerMsg(message string) (output, context string, err error) {
+	return "", "", nil
 }
