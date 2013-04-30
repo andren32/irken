@@ -5,30 +5,30 @@ import (
 	"strings"
 )
 
-// LexIRC scans a IRC message and outputs its tokens.
-func LexIRC(data string) (prefix, command string, params []string, err error) {
+// lexMsg scans a IRC message and outputs its tokens.
+func lexMsg(message string) (prefix, command string, params []string, err error) {
 
 	// grab prefix if present
 	prefixEnd := -1
-	if strings.HasPrefix(data, ":") {
-		prefixEnd = strings.Index(data, " ")
+	if strings.HasPrefix(message, ":") {
+		prefixEnd = strings.Index(message, " ")
 		if prefixEnd == -1 {
 			err = errors.New("Message with only a prefix")
 			return
 		}
-		prefix = data[1:prefixEnd]
+		prefix = message[1:prefixEnd]
 	}
 
 	// grab trailing param if present
 	var trailing string
-	trailingStart := strings.Index(data, " :")
+	trailingStart := strings.Index(message, " :")
 	if trailingStart >= 0 {
-		trailing = data[trailingStart+2:]
+		trailing = message[trailingStart+2:]
 	} else {
-		trailingStart = len(data)
+		trailingStart = len(message)
 	}
 
-	tmp := data[prefixEnd+1 : trailingStart]
+	tmp := message[prefixEnd+1 : trailingStart]
 	cmdAndParams := strings.Fields(tmp)
 	if len(cmdAndParams) < 1 {
 		err = errors.New("Cannot lex command")
@@ -42,4 +42,10 @@ func LexIRC(data string) (prefix, command string, params []string, err error) {
 	}
 
 	return
+}
+
+// ParseServerMsg parses an IRC message from an IRC server and outputs
+// a string ready to be printed out from the client.
+func ParseServerMsg(message string) (string, error) {
+	return "", nil
 }

@@ -11,7 +11,7 @@ import (
 // Config type stores cfg values which can be saved and loaded from a file
 type Config struct {
 	cfgValues map[string]string
-	fileName      string
+	fileName  string
 }
 
 // NewConfig takes a filename, open or creates the file depending on if it

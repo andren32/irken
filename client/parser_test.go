@@ -7,7 +7,7 @@ import (
 
 func TestLexValid(t *testing.T) {
 	message := ":prefix COMMAND param1 param2 :param 3 :-) yeah!?"
-	prefix, command, params, err := LexIRC(message)
+	prefix, command, params, err := lexMsg(message)
 	if err != nil {
 		t.Error(err)
 	}
@@ -21,11 +21,11 @@ func TestLexValid(t *testing.T) {
 func TestLexInValid(t *testing.T) {
 	message := ":prefix"
 	message2 := ":prefix "
-	_, _, _, err := LexIRC(message)
+	_, _, _, err := lexMsg(message)
 	if err == nil {
 		t.Errorf("Illegal message is not error reported")
 	}
-	_, _, _, err := LexIRC(message2)
+	_, _, _, err = lexMsg(message2)
 	if err == nil {
 		t.Errorf("Illegal message is not error reported")
 	}
@@ -34,7 +34,7 @@ func TestLexInValid(t *testing.T) {
 
 func TestLexNoParams(t *testing.T) {
 	message := "COMMAND"
-	prefix, command, params, err := LexIRC(message)
+	prefix, command, params, err := lexMsg(message)
 	if err != nil {
 		t.Error(err)
 	}
