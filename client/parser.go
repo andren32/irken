@@ -49,3 +49,8 @@ func lexMsg(message string) (prefix, command string, params []string, err error)
 func ParseServerMsg(message string) (output, context string, err error) {
 	return "", "", nil
 }
+
+func join(s string) (prefix, params) {
+	nick := resolveNick(prefix)
+
+}
