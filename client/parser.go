@@ -62,13 +62,12 @@ func ParseServerMsg(message string) (output, context string, err error) {
 	}
 }
 
-<<<<<<< HEAD
 func join(prefix string, params []string) (string, string, error) {
 	nick, err := resolveNick(prefix)
 	if err != nil {
 		return "", "", err
 	}
-	channel := strings.Join(params[0], "")
+	channel := strings.Join(params, "")
 	s := nick + " has joined " + channel
 	return s, channel, nil
 }
