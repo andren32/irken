@@ -96,3 +96,21 @@ func TestPrivMsg(t *testing.T) {
 	test.Check(t, msg, expMsg)
 	test.Check(t, cont, expCont)
 }
+
+func TestResolveNick(t *testing.T) {
+	input := "_mrx!blabla@haxxor.com"
+	nick, err := resolveNick(input)
+	if err != nil {
+		t.Errorf("Should parse!")
+	}
+	exp := "_mrx"
+	test.Check(t, nick, exp)
+}
+
+func TestResolveInvalidNick(t *testing.T) {
+	input := "_mrxblabla@haxxor.com"
+	_, err := resolveNick(input)
+	if err == nil {
+		t.Errorf("Should not parse")
+	}
+}

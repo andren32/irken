@@ -52,5 +52,21 @@ func ParseServerMsg(message string) (output, context string, err error) {
 
 func join(s string) (prefix, params) {
 	nick := resolveNick(prefix)
+}
 
+func quit(prefix string, params []string) (output, context string) {
+	// TODO
+	return "", ""
+}
+
+// resolveNick returns the nick or hostname associated with the IRC message
+// it returns empty string when a nick cannot be resolved
+func resolveNick(prefix string) (nick string, err error) {
+	ind := strings.Index(prefix, "!")
+	if ind == -1 {
+		err = errors.New("Cannot resolve nick")
+		return
+	}
+	nick = prefix[:ind]
+	return
 }
