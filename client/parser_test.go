@@ -25,7 +25,7 @@ func TestLexInValid(t *testing.T) {
 	if err == nil {
 		t.Errorf("Illegal message is not error reported")
 	}
-	_, _, _, err := LexIRC(message2)
+	_, _, _, err = LexIRC(message2)
 	if err == nil {
 		t.Errorf("Illegal message is not error reported")
 	}

@@ -11,7 +11,7 @@ import (
 // Config type stores cfg values which can be saved and loaded from a file
 type Config struct {
 	cfgValues map[string]string
-	fileName      string
+	fileName  string
 }
 
 // NewConfig takes a filename, open or creates the file depending on if it
@@ -56,7 +56,7 @@ func (c *Config) Load() error {
 		switch err {
 		case nil:
 			// MIGHT BE BEST TO CHANGE HOW WE HANDLE THE DATA HERE IF FILE ISN'T AS WE EXPECT
-			s := strings.Split(strings.Replace(ln, "\n", "", -1), " ")
+			s := strings.SplitN(strings.Replace(ln, "\n", "", -1), " ", 2)
 			c.AddCfgValue(s[0], s[1])
 		case io.EOF:
 			return nil
