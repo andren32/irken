@@ -47,9 +47,22 @@ func lexMsg(message string) (prefix, command string, params []string, err error)
 // ParseServerMsg parses an IRC message from an IRC server and outputs
 // a string ready to be printed out from the client.
 func ParseServerMsg(message string) (output, context string, err error) {
-	return "", "", nil
+	prefix, command, params, err := lexMsg(message)
+	if err != nil {
+		return
+	}
+	switch command {
+	case "JOIN":
+		return join(prefix, params)
+	case "QUIT":
+		return quit(prefix, params)
+	default:
+		err = errors.New("Unknown command.")
+		return
+	}
 }
 
+<<<<<<< HEAD
 func join(prefix string, params []string) (string, string, error) {
 	nick, err := resolveNick(prefix)
 	if err != nil {
@@ -60,9 +73,13 @@ func join(prefix string, params []string) (string, string, error) {
 	return s, channel, nil
 }
 
-func quit(prefix string, params []string) (output, context string) {
-	// TODO
-	return "", ""
+func quit(prefix string, params []string) (output, context string, err error) {
+	nick, err := resolveNick(prefix)
+	if err != nil {
+		return
+	}
+	_ = nick
+	return "", "", nil
 }
 
 // resolveNick returns the nick or hostname associated with the IRC message
