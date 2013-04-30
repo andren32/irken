@@ -60,6 +60,8 @@ func ParseServerMsg(message string) (output, context string, err error) {
 		err = errors.New("Unknown command.")
 		return
 	}
+
+	return // bug in old go
 }
 
 func join(prefix string, params []string) (string, string, error) {
@@ -67,7 +69,7 @@ func join(prefix string, params []string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	channel := strings.Join(params, "")
+	channel := strings.Join(params, " ")
 	s := nick + " has joined " + channel
 	return s, channel, nil
 }
@@ -81,7 +83,11 @@ func quit(prefix string, params []string) (output, context string, err error) {
 	if len(params) != 0 {
 		output += " (" + params[0] + ")"
 	}
-	context = ""
+	return
+}
+
+func privMsg(prefix string, params []string) (output, context string, err error) {
+	//nick, err := resolveNick(prefix)
 	return
 }
 
