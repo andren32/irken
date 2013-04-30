@@ -71,8 +71,12 @@ func quit(prefix string, params []string) (output, context string, err error) {
 	if err != nil {
 		return
 	}
-	_ = nick
-	return "", "", nil
+	output = nick + " has quit"
+	if len(params) != 0 {
+		output += " (" + params[0] + ")"
+	}
+	context = ""
+	return
 }
 
 // resolveNick returns the nick or hostname associated with the IRC message
