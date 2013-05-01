@@ -58,7 +58,15 @@ func TestJoin(t *testing.T) {
 }
 
 func TestMode(t *testing.T) {
-	// TODO
+	input := ":_mrx!blabla@haxxor.com MODE #chan +i -l"
+	msg, cont, err := ParseServerMsg(input)
+	if err != nil {
+		t.Errorf("Should parse!")
+	}
+	expMsg := "_mrx changed mode +i -l for #chan"
+	expCont := "#chan"
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
 }
 
 func TestQuit(t *testing.T) {
@@ -86,12 +94,12 @@ func TestPart(t *testing.T) {
 }
 
 func TestPrivMsg(t *testing.T) {
-	input := ":_mrx!blabla@haxxor.com PRIVMSG #chan :Octotastic!"
+	input := ":_mrx!blabla@haxxor.com PRIVMSG #chan :Octotastic! I like pie btw :)"
 	msg, cont, err := ParseServerMsg(input)
 	if err != nil {
 		t.Errorf("Should parse!")
 	}
-	expMsg := "_mrx: Octotastic!"
+	expMsg := "_mrx: Octotastic! I like pie btw :)"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
 	test.Check(t, cont, expCont)
