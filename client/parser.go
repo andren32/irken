@@ -52,6 +52,10 @@ func ParseServerMsg(message string) (output, context string, err error) {
 		return
 	}
 	switch command {
+	case "PRIVMSG":
+		return privMsg(prefix, params)
+	case "PART":
+		return part(prefix, params)
 	case "JOIN":
 		return join(prefix, params)
 	case "QUIT":
@@ -87,7 +91,22 @@ func quit(prefix string, params []string) (output, context string, err error) {
 }
 
 func privMsg(prefix string, params []string) (output, context string, err error) {
-	//nick, err := resolveNick(prefix)
+	nick, err := resolveNick(prefix)
+	if err != nil {
+		return
+	}
+	output = nick + ": " + params[len(params)-1]
+	context = params[0]
+	return
+}
+
+func part(prefix string, params []string) (output, context string, err error) {
+	nick, err := resolveNick(prefix)
+	if err != nil {
+		return
+	}
+	output = nick + " has left " + params[0]
+	context = params[0]
 	return
 }
 
