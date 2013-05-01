@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -97,6 +98,12 @@ func ParseServerMsg(message string) (l *Line, err error) {
 	case "QUIT":
 		output, context = quit(l.nick, l.args)
 	default:
+		// check for numeric commands
+		r := regexp.MustCompile("^\\d+$")
+		if r.MatchString(l.cmd) {
+			l.output, l.context = numeric(l.nick, l.args)
+			return
+		}
 		err = errors.New("Unknown command.")
 		return
 	}
@@ -144,6 +151,12 @@ func privMsg(nick string, params []string) (output, context string) {
 func part(nick string, params []string) (output, context string) {
 	output = nick + " has left " + params[0]
 	context = params[0]
+	return
+}
+
+func numeric(nick string, params []string) (output, context string) {
+	context = params[0]
+	output = params[len(params)-1]
 	return
 }
 

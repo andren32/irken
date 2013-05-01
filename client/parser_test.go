@@ -145,6 +145,17 @@ func TestPrivMsg(t *testing.T) {
 	test.Check(t, cont, expCont)
 }
 
+func TestNumeric(t *testing.T) {
+	input := ":_mrx!blabla@haxxor.com 008 user :Something in the beginning"
+	l, err := ParseServerMsg(input)
+	if err != nil {
+		t.Errorf("Should parse!")
+	}
+	msg := l.output
+	expMsg := "Something in the beginning"
+	test.Check(t, msg, expMsg)
+}
+
 func TestResolveValidPrefix(t *testing.T) {
 	input := "_mrx!blabla@haxxor.com"
 	nick, ident, host, src, err := resolvePrefix(input)
