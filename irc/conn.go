@@ -11,9 +11,6 @@ import (
 const DEFAULT_PORT = "6667"
 
 type Conn struct {
-	// user info
-	nick string
-
 	// network utils
 	io   *bufio.ReadWriter
 	sock *net.TCPConn
@@ -25,7 +22,7 @@ type Conn struct {
 // NewConn takes a remote network address and a default nick.
 // It then tries to connect to the supplied address with the
 // properties of the supplied session
-func NewConn(addr string, nick string) (*Conn, error) {
+func NewConn(addr string) (*Conn, error) {
 
 	//TODO: check if addr already contains another port then the default port.
 
@@ -41,7 +38,7 @@ func NewConn(addr string, nick string) (*Conn, error) {
 
 	io := bufio.NewReadWriter(bufio.NewReader(sock), bufio.NewWriter(sock))
 
-	return &Conn{nick, io, sock, time.Minute}, nil
+	return &Conn{io, sock, time.Minute}, nil
 }
 
 // Read attempts to read from the connected server and puts the data into io buffer.
