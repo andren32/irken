@@ -65,10 +65,12 @@ func lexMsg(message string) (l *Line, err error) {
 		return
 	}
 
-	l = &Line{Nick: nick, Ident: ident, Host: host, Src: src,
+	l = &Line{
+		Nick: nick, Ident: ident, Host: host, Src: src,
 		Cmd: command, Raw: message,
 		Args: params,
-		Time: time.Now()}
+		Time: time.Now(),
+	}
 
 	return
 
