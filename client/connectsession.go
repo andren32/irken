@@ -24,7 +24,7 @@ func NewConnectSession(addr string, nick string, realName string) (*ConnectSessi
 
 	// Register the user
 	conn.Write("NICK " + nick + "\r\n")
-	conn.Write("USER " + nick + "0 *:" + realName)
+	conn.Write("USER " + nick + "0 *:" + realName + "\r\n")
 
 	return &ConnectSession{nick, conn, bufs}, nil
 }
