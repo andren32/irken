@@ -84,6 +84,10 @@ func ParseServerMsg(message string) (l *Line, err error) {
 	var output string
 	var context string
 	switch l.cmd {
+	case "NOTICE":
+		output, context = notice(l.nick, l.args)
+	case "MODE":
+		output, context = mode(l.nick, l.args)
 	case "PRIVMSG":
 		output, context = privMsg(l.nick, l.args)
 	case "PART":
@@ -114,6 +118,20 @@ func quit(nick string, params []string) (output, context string) {
 	if len(params) != 0 {
 		output += " (" + params[0] + ")"
 	}
+	return
+}
+
+func notice(nick string, params []string) (output, context string) {
+	return privMsg(nick, params)
+}
+
+func mode(nick string, params []string) (output, context string) {
+	context = params[0]
+	output = nick + " changed mode"
+	for i := 1; i < len(params); i++ {
+		output += " " + params[i]
+	}
+	output += " for " + context
 	return
 }
 

@@ -80,7 +80,7 @@ func TestNotice(t *testing.T) {
 	}
 	msg := l.output
 	cont := l.context
-	expMsg := "Welcome"
+	expMsg := "blabla.haxxor.com: Welcome"
 	expCont := "*"
 	test.Check(t, msg, expMsg)
 	test.Check(t, cont, expCont)
@@ -94,7 +94,7 @@ func TestNoticeNoPrefix(t *testing.T) {
 	}
 	msg := l.output
 	cont := l.context
-	expMsg := "Welcome"
+	expMsg := "<Server>: Welcome"
 	expCont := "*"
 	test.Check(t, msg, expMsg)
 	test.Check(t, cont, expCont)
