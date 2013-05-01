@@ -3,12 +3,31 @@ package client
 import (
 	"errors"
 	"strings"
+	"time"
 )
 
-// lexMsg scans a IRC message and outputs its tokens.
-func lexMsg(message string) (prefix, command string, params []string, err error) {
+type Line struct {
+	Nick, Ident, Host, Src string
+	Cmd, Raw               string
+	Args                   []string
+	Time                   time.Time
+
+	Context   string
+	output    string
+	outputErr error
+}
+
+// Output returns the string to be outputted by the client.
+// It returns an error if the string couldn't be parsed
+func (l *Line) Output() (string, error) {
+	return "", nil
+}
+
+// lexMsg scans a IRC message and outputs its tokens in a Line struct
+func lexMsg(message string) (l *Line, err error) {
 
 	// grab prefix if present
+	var prefix string
 	prefixEnd := -1
 	if strings.HasPrefix(message, ":") {
 		prefixEnd = strings.Index(message, " ")
@@ -35,54 +54,62 @@ func lexMsg(message string) (prefix, command string, params []string, err error)
 		return
 	}
 
-	command = cmdAndParams[0]
-	params = cmdAndParams[1:]
+	command := cmdAndParams[0]
+	params := cmdAndParams[1:]
 	if trailing != "" {
 		params = append(params, trailing)
 	}
 
+	nick, ident, host, src, err := resolvePrefix(prefix)
+	if err != nil {
+		return
+	}
+
+	l = &Line{Nick: nick, Ident: ident, Host: host, Src: src,
+		Cmd: command, Raw: message,
+		Args: params,
+		Time: time.Now()}
+
 	return
+
 }
 
 // ParseServerMsg parses an IRC message from an IRC server and outputs
 // a string ready to be printed out from the client.
-func ParseServerMsg(message string) (output, context string, err error) {
-	prefix, command, params, err := lexMsg(message)
+func ParseServerMsg(message string) (l *Line, err error) {
+	l, err = lexMsg(message)
 	if err != nil {
 		return
 	}
-	switch command {
+	var output string
+	var context string
+	switch l.Cmd {
 	case "PRIVMSG":
-		return privMsg(prefix, params)
+		output, context = privMsg(l.Nick, l.Args)
 	case "PART":
-		return part(prefix, params)
+		output, context = part(l.Nick, l.Args)
 	case "JOIN":
-		return join(prefix, params)
+		output, context = join(l.Nick, l.Args)
 	case "QUIT":
-		return quit(prefix, params)
+		output, context = quit(l.Nick, l.Args)
 	default:
 		err = errors.New("Unknown command.")
 		return
 	}
 
-	return // bug in old go
+	l.output = output
+	l.Context = context
+	return
 }
 
-func join(prefix string, params []string) (string, string, error) {
-	nick, err := resolveNick(prefix)
-	if err != nil {
-		return "", "", err
-	}
-	channel := strings.Join(params, " ")
-	s := nick + " has joined " + channel
-	return s, channel, nil
+func join(nick string, params []string) (output, context string) {
+	channel := params[0]
+	output = nick + " has joined " + channel
+	context = channel
+	return
 }
 
-func quit(prefix string, params []string) (output, context string, err error) {
-	nick, err := resolveNick(prefix)
-	if err != nil {
-		return
-	}
+func quit(nick string, params []string) (output, context string) {
 	output = nick + " has quit"
 	if len(params) != 0 {
 		output += " (" + params[0] + ")"
@@ -90,34 +117,35 @@ func quit(prefix string, params []string) (output, context string, err error) {
 	return
 }
 
-func privMsg(prefix string, params []string) (output, context string, err error) {
-	nick, err := resolveNick(prefix)
-	if err != nil {
-		return
-	}
+func privMsg(nick string, params []string) (output, context string) {
 	output = nick + ": " + params[len(params)-1]
 	context = params[0]
 	return
 }
 
-func part(prefix string, params []string) (output, context string, err error) {
-	nick, err := resolveNick(prefix)
-	if err != nil {
-		return
-	}
+func part(nick string, params []string) (output, context string) {
 	output = nick + " has left " + params[0]
 	context = params[0]
 	return
 }
 
-// resolveNick returns the nick or hostname associated with the IRC message
-// it returns empty string when a nick cannot be resolved
-func resolveNick(prefix string) (nick string, err error) {
-	ind := strings.Index(prefix, "!")
-	if ind == -1 {
-		err = errors.New("Cannot resolve nick")
+// resolvePrefix returns the token of the IRC message prefix
+func resolvePrefix(prefix string) (nick, ident, host, src string, err error) {
+	if prefix == "" {
+		err = errors.New("Invalid prefix")
 		return
 	}
-	nick = prefix[:ind]
+	src = prefix
+
+	nickEnd := strings.Index(prefix, "!")
+	userEnd := strings.Index(prefix, "@")
+	if nickEnd != -1 && userEnd != -1 {
+		nick = prefix[0:nickEnd]
+		ident = prefix[nickEnd+1 : userEnd]
+		host = prefix[userEnd+1:]
+	} else {
+		nick = src
+	}
+
 	return
 }
