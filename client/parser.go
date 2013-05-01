@@ -7,20 +7,18 @@ import (
 )
 
 type Line struct {
-	Nick, Ident, Host, Src string
-	Cmd, Raw               string
-	Args                   []string
-	Time                   time.Time
+	nick, ident, host, src string
+	cmd, raw               string
+	args                   []string
+	time                   time.Time
 
-	Context   string
-	output    string
-	outputErr error
+	context string
+	output  string
 }
 
-// Output returns the string to be outputted by the client.
-// It returns an error if the string couldn't be parsed
-func (l *Line) Output() (string, error) {
-	return "", nil
+// Output returns the formatted string to be outputted by the client
+func (l *Line) Output() string {
+	return "[" + l.time.Format("15:04:05") + "] " + l.output
 }
 
 // lexMsg scans a IRC message and outputs its tokens in a Line struct
@@ -66,10 +64,10 @@ func lexMsg(message string) (l *Line, err error) {
 	}
 
 	l = &Line{
-		Nick: nick, Ident: ident, Host: host, Src: src,
-		Cmd: command, Raw: message,
-		Args: params,
-		Time: time.Now(),
+		nick: nick, ident: ident, host: host, src: src,
+		cmd: command, raw: message,
+		args: params,
+		time: time.Now(),
 	}
 
 	return
@@ -85,22 +83,22 @@ func ParseServerMsg(message string) (l *Line, err error) {
 	}
 	var output string
 	var context string
-	switch l.Cmd {
+	switch l.cmd {
 	case "PRIVMSG":
-		output, context = privMsg(l.Nick, l.Args)
+		output, context = privMsg(l.nick, l.args)
 	case "PART":
-		output, context = part(l.Nick, l.Args)
+		output, context = part(l.nick, l.args)
 	case "JOIN":
-		output, context = join(l.Nick, l.Args)
+		output, context = join(l.nick, l.args)
 	case "QUIT":
-		output, context = quit(l.Nick, l.Args)
+		output, context = quit(l.nick, l.args)
 	default:
 		err = errors.New("Unknown command.")
 		return
 	}
 
 	l.output = output
-	l.Context = context
+	l.context = context
 	return
 }
 
@@ -133,11 +131,11 @@ func part(nick string, params []string) (output, context string) {
 
 // resolvePrefix returns the token of the IRC message prefix
 func resolvePrefix(prefix string) (nick, ident, host, src string, err error) {
+	src = prefix
 	if prefix == "" {
-		err = errors.New("Invalid prefix")
+		nick = "<Server>"
 		return
 	}
-	src = prefix
 
 	nickEnd := strings.Index(prefix, "!")
 	userEnd := strings.Index(prefix, "@")

@@ -11,9 +11,9 @@ func TestLexValid(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	prefix := l.Src
-	command := l.Cmd
-	params := l.Args
+	prefix := l.src
+	command := l.cmd
+	params := l.args
 
 	test.Check(t, prefix, "prefix")
 	test.Check(t, command, "COMMAND")
@@ -39,8 +39,8 @@ func TestLexInValid(t *testing.T) {
 func TestLexNoParams(t *testing.T) {
 	message := "COMMAND"
 	_, err := lexMsg(message)
-	if err == nil {
-		t.Errorf("No prefix - should not parse")
+	if err != nil {
+		t.Errorf("Should parse")
 	}
 }
 
@@ -51,7 +51,7 @@ func TestJoin(t *testing.T) {
 		t.Errorf("Should parse!")
 	}
 	msg := l.output
-	cont := l.Context
+	cont := l.context
 	expMsg := "_mrx has joined #chan"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
@@ -65,9 +65,37 @@ func TestMode(t *testing.T) {
 		t.Errorf("Should parse!")
 	}
 	msg := l.output
-	cont := l.Context
+	cont := l.context
 	expMsg := "_mrx changed mode +i -l for #chan"
 	expCont := "#chan"
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
+}
+
+func TestNotice(t *testing.T) {
+	input := ":blabla.haxxor.com NOTICE * :Welcome"
+	l, err := ParseServerMsg(input)
+	if err != nil {
+		t.Errorf("Should parse!")
+	}
+	msg := l.output
+	cont := l.context
+	expMsg := "Welcome"
+	expCont := "*"
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
+}
+
+func TestNoticeNoPrefix(t *testing.T) {
+	input := "NOTICE * :Welcome"
+	l, err := ParseServerMsg(input)
+	if err != nil {
+		t.Errorf("Should parse!")
+	}
+	msg := l.output
+	cont := l.context
+	expMsg := "Welcome"
+	expCont := "*"
 	test.Check(t, msg, expMsg)
 	test.Check(t, cont, expCont)
 }
@@ -79,7 +107,7 @@ func TestQuit(t *testing.T) {
 		t.Errorf("Should parse!")
 	}
 	msg := l.output
-	cont := l.Context
+	cont := l.context
 	expMsg := "_mrx has quit (Later suckerz)"
 	expCont := ""
 	test.Check(t, msg, expMsg)
@@ -93,7 +121,7 @@ func TestPart(t *testing.T) {
 		t.Errorf("Should parse!")
 	}
 	msg := l.output
-	cont := l.Context
+	cont := l.context
 	expMsg := "_mrx has left #chan"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
@@ -107,7 +135,7 @@ func TestPrivMsg(t *testing.T) {
 		t.Errorf("Should parse!")
 	}
 	msg := l.output
-	cont := l.Context
+	cont := l.context
 	if err != nil {
 		t.Errorf("Should parse!")
 	}
@@ -134,12 +162,21 @@ func TestResolveValidPrefix(t *testing.T) {
 	test.Check(t, src, expSrc)
 }
 
-func TestResolveInvalidPrefix(t *testing.T) {
+func TestResolveEmptyPrefix(t *testing.T) {
 	input := ""
-	_, _, _, _, err := resolvePrefix(input)
-	if err == nil {
+	nick, ident, host, src, err := resolvePrefix(input)
+	if err != nil {
 		t.Errorf("Should not parse")
 	}
+	expNick := "<Server>"
+	expIdent := ""
+	expHost := ""
+	expSrc := ""
+
+	test.Check(t, nick, expNick)
+	test.Check(t, ident, expIdent)
+	test.Check(t, host, expHost)
+	test.Check(t, src, expSrc)
 }
 
 func TestResolveServer(t *testing.T) {
