@@ -60,10 +60,12 @@ func TestJoin(t *testing.T) {
 
 func TestMode(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com MODE #chan +i -l"
-	msg, cont, err := ParseServerMsg(input)
+	l, err := ParseServerMsg(input)
 	if err != nil {
 		t.Errorf("Should parse!")
 	}
+	msg := l.output
+	cont := l.Context
 	expMsg := "_mrx changed mode +i -l for #chan"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
