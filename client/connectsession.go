@@ -12,21 +12,25 @@ type ConnectSession struct {
 
 	// etc
 	Conn        *irc.Conn
-	IrcChannels map[string]irc.IRCChannel
+	IrcChannels map[string]*IRCChannel
 }
 
 func NewConnectSession(addr string, nick string, realName string) (*ConnectSession, error) {
+
 	Conn, err := irc.NewConn(addr)
 	if err != nil {
 		return nil, err
 	}
-	ircChannels := make(map[string]irc.IRCChannel)
+	ircChannels := make(map[string]*IRCChannel)
 
 	// Register the user
 	Conn.Write("NICK " + nick + "\r\n")
 	Conn.Write("USER " + nick + " 0 * :" + realName + "\r\n")
 
-	return &ConnectSession{nick, Conn, ircChannels}, nil
+	cs := &ConnectSession{nick, Conn, ircChannels}
+	cs.NewChannel("") // Default server channel
+
+	return cs, nil
 }
 
 func (cs *ConnectSession) ReadToChannels() {
@@ -42,7 +46,22 @@ func (cs *ConnectSession) ReadToChannels() {
 				// HANDLE ERROR...
 			}
 
-			cs.IrcChannels[line.Context()].Ch <- line.Output()
+			value, ok := cs.IrcChannels[line.Context()]
+			if !ok {
+				cs.IrcChannels[""].Ch <- line
+			} else {
+				value.Ch <- line
+			}
+
 		}
 	}()
+}
+
+func (cs *ConnectSession) NewChannel(context string) {
+	cs.IrcChannels[context] = &IRCChannel{Ch: make(chan *Line)}
+	//TODO errorstuff
+}
+
+func (cs *ConnectSession) DeleteChannel(context string) {
+	delete(cs.IrcChannels, context)
 }

@@ -20,11 +20,25 @@ func main() {
 		fmt.Println(err)
 	}
 
+	cs.IrcChannels["#freenode"] = &client.IRCChannel{Ch: make(chan *client.Line)}
 	cs.ReadToChannels()
 
 	go func() {
-		fmt.Print("SERVER WINDOW: ")
-		fmt.Println(<-cs.IrcChannels[""].Ch)
+		for {
+			line := <-cs.IrcChannels[""].Ch
+			fmt.Println(line.Raw())
+			fmt.Print("SERVER WINDOW: ")
+			fmt.Println(line.Output())
+		}
+	}()
+
+	go func() {
+		for {
+			line := <-cs.IrcChannels["#freenode"].Ch
+			fmt.Println(line.Raw())
+			fmt.Print("FREENODE: ")
+			fmt.Println(line.Output())
+		}
 	}()
 
 	go func() {

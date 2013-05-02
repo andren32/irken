@@ -28,6 +28,10 @@ func (l *Line) Context() string {
 	return l.context
 }
 
+func (l *Line) Raw() string {
+	return l.raw
+}
+
 // lexServerMsg scans a IRC message and outputs its tokens in a Line struct
 func lexServerMsg(message string) (l *Line, err error) {
 
