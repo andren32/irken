@@ -11,38 +11,38 @@ type ConnectSession struct {
 	nick string
 
 	// etc
-	Conn *irc.Conn
-	Bufs map[string]Buffer
+	Conn        *irc.Conn
+	IrcChannels map[string]irc.IRCChannel
 }
 
 func NewConnectSession(addr string, nick string, realName string) (*ConnectSession, error) {
-	conn, err := irc.NewConn(addr)
+	Conn, err := irc.NewConn(addr)
 	if err != nil {
 		return nil, err
 	}
-	bufs := make(map[string]Buffer)
+	ircChannels := make(map[string]irc.IRCChannel)
 
 	// Register the user
 	Conn.Write("NICK " + nick + "\r\n")
 	Conn.Write("USER " + nick + " 0 * :" + realName + "\r\n")
 
-	return &ConnectSession{nick, conn, bufs}, nil
+	return &ConnectSession{nick, Conn, ircChannels}, nil
 }
 
-func (cs *ConnectSession) LoadBuffers() {
+func (cs *ConnectSession) ReadToChannels() {
 	go func() {
 		for {
-			s, err := conn.Read()
+			s, err := cs.Conn.Read()
 			if err != nil {
 				// HANDLE ERROR...	
 			}
-			line, err := client.ParseServerMessage(s)
+			line, err := ParseServerMsg(s)
 
 			if err != nil {
 				// HANDLE ERROR...
 			}
 
-			Buf[line.Context].Write(line.Output())
+			cs.IrcChannels[line.Context()].Ch <- line.Output()
 		}
 	}()
 }

@@ -20,7 +20,12 @@ func main() {
 		fmt.Println(err)
 	}
 
-	cs.LoadBuffers()
+	cs.ReadToChannels()
+
+	go func() {
+		fmt.Print("SERVER WINDOW: ")
+		fmt.Println(<-cs.IrcChannels[""].Ch)
+	}()
 
 	go func() {
 		for {
