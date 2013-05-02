@@ -145,6 +145,17 @@ func TestPrivMsg(t *testing.T) {
 	test.Check(t, cont, expCont)
 }
 
+func TestNick(t *testing.T) {
+	input := ":WiZ!jto@tolsun.oulu.fi NICK Kilroy"
+	l, err := ParseServerMsg(input)
+	if err != nil {
+		t.Errorf("Should parse!")
+	}
+	msg := l.output
+	expMsg := "WiZ changed nick to Kilroy"
+	test.Check(t, msg, expMsg)
+}
+
 func TestNumeric(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com 008 user :Something in the beginning"
 	l, err := ParseServerMsg(input)

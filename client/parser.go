@@ -87,6 +87,8 @@ func ParseServerMsg(message string) (l *Line, err error) {
 	switch l.cmd {
 	case "NOTICE":
 		output, context = notice(l.nick, l.args)
+	case "NICK":
+		output, context = nick(l.nick, l.args)
 	case "MODE":
 		output, context = mode(l.nick, l.args)
 	case "PRIVMSG":
@@ -151,6 +153,11 @@ func privMsg(nick string, params []string) (output, context string) {
 func part(nick string, params []string) (output, context string) {
 	output = nick + " has left " + params[0]
 	context = params[0]
+	return
+}
+
+func nick(nick string, params []string) (output, context string) {
+	output = nick + " changed nick to " + params[0]
 	return
 }
 
