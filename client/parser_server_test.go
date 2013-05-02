@@ -178,7 +178,7 @@ func TestTopicSetBy(t *testing.T) {
 	}
 	msg := l.output
 	cont := l.context
-	expMsg := "Topic set by marienz on Sat, 06 Apr 2013 05:12:39 CEST"
+	expMsg := "Topic set by marienz on Sat, 06 Apr 2013 03:12:39 UTC"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
 	test.Check(t, cont, expCont)

@@ -113,7 +113,10 @@ func ParseServerMsg(message string) (l *Line, err error) {
 	case "332":
 		output, context = topic(l.args)
 	case "333":
-		output, context = topicSetBy(l.args)
+		output, context, err = topicSetBy(l.args)
+		if err != nil {
+			return
+		}
 	default:
 		// check for numeric commands
 		r := regexp.MustCompile("^\\d+$")
@@ -189,9 +192,9 @@ func topic(params []string) (output, context string) {
 	return
 }
 
-func topicSetBy(params []string) (output, context string) {
+func topicSetBy(params []string) (output, context string, err error) {
 	setBy := params[len(params)-2]
-	t, _ := strconv.Atoi(params[len(params)-1])
+	t, err := strconv.Atoi(params[len(params)-1])
 	unixTime := int64(t)
 	// ugly way to get a channel context
 	for i := 0; i < len(params)-1; i++ {
@@ -202,7 +205,7 @@ func topicSetBy(params []string) (output, context string) {
 	}
 
 	output = "Topic set by " + setBy + " on " +
-		time.Unix(unixTime, 0).Format(time.RFC1123)
+		time.Unix(unixTime, 0).UTC().Format(time.RFC1123)
 	return
 }
 
