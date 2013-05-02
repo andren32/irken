@@ -22,6 +22,12 @@ func (l *Line) Output() string {
 	return "[" + l.time.Format("15:04:05") + "] " + l.output
 }
 
+// Context returns the context string of the line. Empty context equals
+// server and/or client context
+func (l *Line) Context() string {
+	return l.context
+}
+
 // lexServerMsg scans a IRC message and outputs its tokens in a Line struct
 func lexServerMsg(message string) (l *Line, err error) {
 
