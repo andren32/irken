@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-func TestLexValid(t *testing.T) {
+func TestLexValidServerMsg(t *testing.T) {
 	message := ":prefix COMMAND param1 param2 :param 3 :-) yeah!?"
-	l, err := lexMsg(message)
+	l, err := lexServerMsg(message)
 	if err != nil {
 		t.Error(err)
 	}
@@ -22,14 +22,14 @@ func TestLexValid(t *testing.T) {
 	test.Check(t, params[2], "param 3 :-) yeah!?")
 }
 
-func TestLexInValid(t *testing.T) {
+func TestLexInValidServerMsg(t *testing.T) {
 	message := ":prefix"
 	message2 := ":prefix "
-	_, err := lexMsg(message)
+	_, err := lexServerMsg(message)
 	if err == nil {
 		t.Errorf("Illegal message is not error reported")
 	}
-	_, err = lexMsg(message2)
+	_, err = lexServerMsg(message2)
 	if err == nil {
 		t.Errorf("Illegal message is not error reported")
 	}
@@ -38,7 +38,7 @@ func TestLexInValid(t *testing.T) {
 
 func TestLexNoParams(t *testing.T) {
 	message := "COMMAND"
-	_, err := lexMsg(message)
+	_, err := lexServerMsg(message)
 	if err != nil {
 		t.Errorf("Should parse")
 	}

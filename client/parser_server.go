@@ -22,8 +22,8 @@ func (l *Line) Output() string {
 	return "[" + l.time.Format("15:04:05") + "] " + l.output
 }
 
-// lexMsg scans a IRC message and outputs its tokens in a Line struct
-func lexMsg(message string) (l *Line, err error) {
+// lexServerMsg scans a IRC message and outputs its tokens in a Line struct
+func lexServerMsg(message string) (l *Line, err error) {
 
 	// grab prefix if present
 	var prefix string
@@ -68,7 +68,6 @@ func lexMsg(message string) (l *Line, err error) {
 		nick: nick, ident: ident, host: host, src: src,
 		cmd: command, raw: message,
 		args: params,
-		time: time.Now(),
 	}
 
 	return
@@ -78,7 +77,8 @@ func lexMsg(message string) (l *Line, err error) {
 // ParseServerMsg parses an IRC message from an IRC server and outputs
 // a string ready to be printed out from the client.
 func ParseServerMsg(message string) (l *Line, err error) {
-	l, err = lexMsg(message)
+	l, err = lexServerMsg(message)
+	l.time = time.Now()
 	if err != nil {
 		return
 	}
