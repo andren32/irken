@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -109,6 +110,10 @@ func ParseServerMsg(message string) (l *Line, err error) {
 		output, context = join(l.nick, l.args)
 	case "QUIT":
 		output, context = quit(l.nick, l.args)
+	case "332":
+		output, context = topic(l.args)
+	case "333":
+		output, context = topicSetBy(l.args)
 	default:
 		// check for numeric commands
 		r := regexp.MustCompile("^\\d+$")
@@ -168,6 +173,36 @@ func part(nick string, params []string) (output, context string) {
 
 func nick(nick string, params []string) (output, context string) {
 	output = nick + " changed nick to " + params[0]
+	return
+}
+
+func topic(params []string) (output, context string) {
+	topic := params[len(params)-1]
+	// ugly way to get a channel context
+	for i := 0; i < len(params)-1; i++ {
+		if strings.HasPrefix(params[i], "#") {
+			context = params[i]
+			break
+		}
+	}
+	output = "Topic for " + context + " is \"" + topic + "\""
+	return
+}
+
+func topicSetBy(params []string) (output, context string) {
+	setBy := params[len(params)-2]
+	t, _ := strconv.Atoi(params[len(params)-1])
+	unixTime := int64(t)
+	// ugly way to get a channel context
+	for i := 0; i < len(params)-1; i++ {
+		if strings.HasPrefix(params[i], "#") {
+			context = params[i]
+			break
+		}
+	}
+
+	output = "Topic set by " + setBy + " on " +
+		time.Unix(unixTime, 0).Format(time.RFC1123)
 	return
 }
 

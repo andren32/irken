@@ -156,6 +156,34 @@ func TestNick(t *testing.T) {
 	test.Check(t, msg, expMsg)
 }
 
+func TestTopic(t *testing.T) {
+	input := ":blabla.haxxor.com 332 axelri #chan :Welcome to chan!"
+	l, err := ParseServerMsg(input)
+	if err != nil {
+		t.Errorf("Should parse!")
+	}
+	msg := l.output
+	cont := l.context
+	expMsg := "Topic for #chan is \"Welcome to chan!\""
+	expCont := "#chan"
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
+}
+
+func TestTopicSetBy(t *testing.T) {
+	input := ":blabla.haxxor.com 333 user #chan marienz 1365217959"
+	l, err := ParseServerMsg(input)
+	if err != nil {
+		t.Errorf("Should parse!")
+	}
+	msg := l.output
+	cont := l.context
+	expMsg := "Topic set by marienz on Sat, 06 Apr 2013 05:12:39 CEST"
+	expCont := "#chan"
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
+}
+
 func TestNumeric(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com 008 user :Something in the beginning"
 	l, err := ParseServerMsg(input)
