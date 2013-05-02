@@ -11,8 +11,8 @@ type ConnectSession struct {
 	nick string
 
 	// etc
-	conn *irc.Conn
-	bufs map[string]Buffer
+	Conn *irc.Conn
+	Bufs map[string]Buffer
 }
 
 func NewConnectSession(addr string, nick string, realName string) (*ConnectSession, error) {
@@ -23,8 +23,26 @@ func NewConnectSession(addr string, nick string, realName string) (*ConnectSessi
 	bufs := make(map[string]Buffer)
 
 	// Register the user
-	conn.Write("NICK " + nick + "\r\n")
-	conn.Write("USER " + nick + "0 *:" + realName + "\r\n")
+	Conn.Write("NICK " + nick + "\r\n")
+	Conn.Write("USER " + nick + " 0 * :" + realName + "\r\n")
 
 	return &ConnectSession{nick, conn, bufs}, nil
+}
+
+func (cs *ConnectSession) LoadBuffers() {
+	go func() {
+		for {
+			s, err := conn.Read()
+			if err != nil {
+				// HANDLE ERROR...	
+			}
+			line, err := client.ParseServerMessage(s)
+
+			if err != nil {
+				// HANDLE ERROR...
+			}
+
+			Buf[line.Context].Write(line.Output())
+		}
+	}()
 }

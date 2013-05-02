@@ -84,11 +84,12 @@ func main() {
 	vpaned.Pack1(frame1, false, false)
 	vpaned.Pack2(frame2, false, false)
 
+	notebook := gtk.NewNotebook()
 	for n := 1; n <= 10; n++ {
 		page := gtk.NewFrame("demo" + strconv.Itoa(n))
 		notebook.AppendPage(page, gtk.NewLabel("demo"+strconv.Itoa(n)))
 
-		vbox := gtk.NewHBox(false, 1)
+		vbox := gtk.NewVBox(false, 1)
 
 		page.Add(vbox)
 	}
