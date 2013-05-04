@@ -11,6 +11,9 @@ import (
 // lexServerMsg scans a IRC message and outputs its tokens in a Line struct
 func lexServerMsg(message string) (l *Line, err error) {
 
+	// make a timestamp as early as possible
+	t := time.Now()
+
 	// grab prefix if present
 	var prefix string
 	prefixEnd := -1
@@ -54,6 +57,7 @@ func lexServerMsg(message string) (l *Line, err error) {
 		nick: nick, ident: ident, host: host, src: src,
 		cmd: command, raw: message,
 		args: params,
+		time: t,
 	}
 
 	return
@@ -64,7 +68,6 @@ func lexServerMsg(message string) (l *Line, err error) {
 // a string ready to be printed out from the client.
 func ParseServerMsg(message string) (l *Line, err error) {
 	l, err = lexServerMsg(message)
-	l.time = time.Now()
 	if err != nil {
 		return
 	}

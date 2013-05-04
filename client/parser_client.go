@@ -30,10 +30,10 @@ func lexClientMsg(message string) (l *Line, err error) {
 			arg = message[cmdEnd+1:]
 		}
 	} else if strings.HasPrefix(message, "\\/") {
-		cmd = "PRIVMSG"
+		cmd = "CHAN"
 		arg = message[1:]
 	} else {
-		cmd = "PRIVMSG"
+		cmd = "CHAN"
 		arg = message
 	}
 
@@ -54,6 +54,50 @@ func lexClientMsg(message string) (l *Line, err error) {
 // i.e. "/help join"
 func parseClientMsg(message, nick, context string) (l *Line,
 	out string, err error) {
+	l, err = lexClientMsg(message)
+	if err != nil {
+		return
+	}
+	// quite ugly way to see if the context has changed.
+	// since empty context is allowed, the default value is valid
+	pr, cont := "", "$"
+	switch l.cmd {
+	case "CHAN":
+		out, pr = clChan(nick, context, l.args)
+	case "ME":
+		out, pr = clMe(nick, context, l.args)
+	case "JOIN":
+		out, pr, cont = clJoin(nick, l.args)
+	default:
+		err = errors.New("Unknown command")
+	}
+
+	if err != nil {
+		return
+	}
+	if cont != "$" {
+		context = cont
+	}
+	l.context = context
+	l.output = pr
+
+	return
+}
+
+func clChan(nick, context string, params []string) (out, pr string) {
+	out = "PRIVMSG " + context + " :" + params[0]
+	pr = nick + ": " + params[0]
+	return
+}
+
+func clJoin(nick string, params []string) (out, pr, context string) {
+	context = params[0]
+	out = "JOIN " + params[0]
+	pr = nick + " joined " + params[0]
+	return
+}
+
+func clMe(nick, context string, params []string) (out, pr string) {
 	// TODO
 	return
 }

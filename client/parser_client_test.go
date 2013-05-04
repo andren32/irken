@@ -9,7 +9,7 @@ func TestLexClientCommand(t *testing.T) {
 	input := "/command argument"
 	l, err := lexClientMsg(input)
 	if err != nil {
-		t.Errorf("Should parse")
+		test.UnExpErr(t, err)
 	}
 	arg := l.args[0]
 	cmd := l.cmd
@@ -23,12 +23,12 @@ func TestLexClientMessage(t *testing.T) {
 	input := "Hallo from another world!"
 	l, err := lexClientMsg(input)
 	if err != nil {
-		t.Errorf("Should parse")
+		test.UnExpErr(t, err)
 	}
 	arg := l.args[0]
 	cmd := l.cmd
 	expArg := "Hallo from another world!"
-	expCmd := "PRIVMSG"
+	expCmd := "CHAN"
 	test.Check(t, arg, expArg)
 	test.Check(t, cmd, expCmd)
 }
@@ -37,12 +37,12 @@ func TestLexClientMessageEscapeChar(t *testing.T) {
 	input := "\\/Hallo from another world!"
 	l, err := lexClientMsg(input)
 	if err != nil {
-		t.Errorf("Should parse")
+		test.UnExpErr(t, err)
 	}
 	arg := l.args[0]
 	cmd := l.cmd
 	expArg := "/Hallo from another world!"
-	expCmd := "PRIVMSG"
+	expCmd := "CHAN"
 	test.Check(t, arg, expArg)
 	test.Check(t, cmd, expCmd)
 }
@@ -55,24 +55,61 @@ func TestLexClientInvalidMessage(t *testing.T) {
 	}
 }
 
-func TestClientJoinChan(t *testing.T) {
-	// input := "/join #chan"
-	// nick := "user"
-	// context := ""
-	// l, o, err := parseClientMsg(input, nick, context)
-	// if err != nil {
-	// 	t.Errorf("Should parse")
-	// }
-	// pr := l.output
+func TestClientChanMsg(t *testing.T) {
+	input := "testing testing 123"
+	nick := "user"
+	context := "#chan"
+	l, o, err := parseClientMsg(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.output
+	cont := l.context
 
-	// expOut := "JOIN #chan"
-	// expPr := "user joined #chan"
-	// test.Check(t, o, expOut)
-	// test.Check(t, pr, expPr)
+	expCont := "#chan"
+	expOut := "PRIVMSG #chan :testing testing 123"
+	expPr := "user: testing testing 123"
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+	test.Check(t, cont, expCont)
+}
+
+func TestClientJoinChan(t *testing.T) {
+	input := "/join #chan"
+	nick := "user"
+	context := ""
+	l, o, err := parseClientMsg(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.output
+	cont := l.context
+
+	expCont := "#chan"
+	expOut := "JOIN #chan"
+	expPr := "user joined #chan"
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+	test.Check(t, cont, expCont)
 }
 
 func TestClientMe(t *testing.T) {
-	// TODO
+	input := "/me is testing IRC"
+	nick := "user"
+	context := "#chan"
+	l, o, err := parseClientMsg(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.output
+	cont := l.context
+
+	expCont := "#chan"
+	expOut := "PRIVMSG #chan :user is testing IRC"
+	expPr := "user is testing IRC"
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+	test.Check(t, cont, expCont)
 }
 
 func TestClientHelp(t *testing.T) {
