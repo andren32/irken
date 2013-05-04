@@ -1,6 +1,8 @@
 package client
 
 import (
+	"errors"
+	"regexp"
 	"strings"
 )
 
@@ -10,10 +12,15 @@ func lexClientMsg(message string) (l *Line, err error) {
 
 	var cmd string
 	var arg string
-	if strings.HasPrefix(message, "//") {
-		cmd = "PRIVMSG"
-		arg = message[1:]
-	} else if strings.HasPrefix(message, "/") {
+	// a slash followed by any non-word char is an invalid command
+	r := "^/\\W+"
+	regex := regexp.MustCompile(r)
+	if regex.MatchString(message) {
+		err = errors.New("Invalid command")
+		return
+	}
+
+	if strings.HasPrefix(message, "/") {
 		cmdEnd := strings.Index(message, " ")
 		if cmdEnd == -1 {
 			cmd = strings.ToUpper(message[1:])
@@ -22,6 +29,9 @@ func lexClientMsg(message string) (l *Line, err error) {
 			cmd = strings.ToUpper(message[1:cmdEnd])
 			arg = message[cmdEnd+1:]
 		}
+	} else if strings.HasPrefix(message, "\\/") {
+		cmd = "PRIVMSG"
+		arg = message[1:]
 	} else {
 		cmd = "PRIVMSG"
 		arg = message
