@@ -85,13 +85,14 @@ func ParseServerMsg(message string) (l *Line, err error) {
 		output, context = join(l.nick, l.args)
 	case "QUIT":
 		output, context = quit(l.nick, l.args)
+	case "328":
+		output, context, err = chanUrl(l.args)
+	case "329":
+		output, context, err = chanCreated(l.args)
 	case "332":
-		output, context = topic(l.args)
+		output, context, err = topic(l.args)
 	case "333":
 		output, context, err = topicSetBy(l.args)
-		if err != nil {
-			return
-		}
 	default:
 		// check for numeric commands
 		r := regexp.MustCompile("^\\d+$")
@@ -100,6 +101,9 @@ func ParseServerMsg(message string) (l *Line, err error) {
 			return
 		}
 		err = errors.New("Unknown command.")
+		return
+	}
+	if err != nil {
 		return
 	}
 
@@ -154,34 +158,56 @@ func nick(nick string, params []string) (output, context string) {
 	return
 }
 
-func topic(params []string) (output, context string) {
+func topic(params []string) (output, context string, err error) {
 	topic := params[len(params)-1]
 	// ugly way to get a channel context
-	for i := 0; i < len(params)-1; i++ {
-		if strings.HasPrefix(params[i], "#") {
-			context = params[i]
-			break
-		}
+	context, err = getChanContext(params)
+	if err != nil {
+		return
 	}
 	output = "Topic for " + context + " is \"" + topic + "\""
 	return
 }
 
 func topicSetBy(params []string) (output, context string, err error) {
-	setBy := params[len(params)-2]
-	t, err := strconv.Atoi(params[len(params)-1])
-	unixTime := int64(t)
-	// ugly way to get a channel context
-	for i := 0; i < len(params)-1; i++ {
-		if strings.HasPrefix(params[i], "#") {
-			context = params[i]
-			break
-		}
+	context, err = getChanContext(params)
+	if err != nil {
+		return
 	}
 
-	output = "Topic set by " + setBy + " on " +
-		time.Unix(unixTime, 0).UTC().Format(time.RFC1123)
+	setBy := params[len(params)-2]
+	t, err := timeFromUnixString(params[len(params)-1])
+	if err != nil {
+		return
+	}
+
+	output = "Topic set by " + setBy + " on " + t.Format(time.RFC1123)
 	return
+}
+
+func chanUrl(params []string) (output, context string, err error) {
+	context, err = getChanContext(params)
+	if err != nil {
+		return
+	}
+	output = "URL for " + context + ": " + params[len(params)-1]
+	return
+}
+
+func chanCreated(params []string) (output, context string, err error) {
+	context, err = getChanContext(params)
+	if err != nil {
+		return
+	}
+
+	t, err := timeFromUnixString(params[len(params)-1])
+	if err != nil {
+		return
+	}
+
+	output = "Channel created on " + t.Format(time.RFC1123)
+	return
+
 }
 
 func numeric(nick string, params []string) (output, context string) {
@@ -208,5 +234,28 @@ func resolvePrefix(prefix string) (nick, ident, host, src string, err error) {
 		nick = src
 	}
 
+	return
+}
+
+// getChanContext searches the list of parameters in order to find a
+// channel context. It returns an error when it can't find any.
+func getChanContext(params []string) (context string, err error) {
+	for _, arg := range params {
+		if strings.HasPrefix(arg, "#") {
+			context = arg
+			return
+		}
+	}
+	err = errors.New("Can't find channel context")
+	return
+}
+
+func timeFromUnixString(uTime string) (t time.Time, err error) {
+	tmp, err := strconv.Atoi(uTime)
+	if err != nil {
+		return
+	}
+	unixTime := int64(tmp)
+	t = time.Unix(unixTime, 0).UTC()
 	return
 }
