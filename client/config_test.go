@@ -3,13 +3,16 @@ package client
 import "testing"
 
 func setup() []*Config {
-	cfg := make([]*Config, 3)
+	cfg := make([]*Config, 4)
 	cfg[0] = NewConfig("testcfg0.cfg")
 	cfg[1] = NewConfig("testcfg1.cfg")
 	cfg[2] = NewConfig("testcfg2.cfg")
+	cfg[3] = NewConfig("testcfg3.cfg")
 
 	cfg[1].AddCfgValue("NICK", "Pelle")
 	cfg[1].AddCfgValue("DEFAULT_SERVER", "irc.freenode.net")
+
+	cfg[3].AddCfgValue("köttbulle", "en fin mening!")
 
 	return cfg
 }
@@ -22,7 +25,7 @@ func TestCfgValue(t *testing.T) {
 	if cfgvalues["NICK"] != "Pelle" {
 		t.Fail()
 	}
-		if cfgvalues["DEFAULT_SERVER"] != "irc.freenode.net" {
+	if cfgvalues["DEFAULT_SERVER"] != "irc.freenode.net" {
 		t.Fail()
 	}
 
@@ -31,7 +34,7 @@ func TestCfgValue(t *testing.T) {
 	if cfgvalues["NICK"] != "Kalle" {
 		t.Fail()
 	}
-		if cfgvalues["DEFAULT_SERVER"] != "irc.whatever.net" {
+	if cfgvalues["DEFAULT_SERVER"] != "irc.whatever.net" {
 		t.Fail()
 	}
 
@@ -71,6 +74,13 @@ func TestLoadAndSave(t *testing.T) {
 	err = cfg[2].Load()
 	checkError(err, t)
 	if len(cfg[2].GetCfgValues()) != 0 {
+		t.Fail()
+	}
+
+	cfg[3].Save()
+	cfg[3].Load()
+
+	if cfg[3].GetCfgValues()["köttbulle"] != "en fin mening!" {
 		t.Fail()
 	}
 }
