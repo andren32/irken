@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"irken/client/msg"
 	"regexp"
 	"strconv"
 	"strings"
@@ -9,7 +10,7 @@ import (
 )
 
 // lexServerMsg scans a IRC message and outputs its tokens in a Line struct
-func lexServerMsg(message string) (l *Line, err error) {
+func lexServerMsg(message string) (l *msg.Line, err error) {
 
 	// make a timestamp as early as possible
 	t := time.Now()
@@ -53,65 +54,67 @@ func lexServerMsg(message string) (l *Line, err error) {
 		return
 	}
 
-	l = &Line{
-		nick: nick, ident: ident, host: host, src: src,
-		cmd: command, raw: message,
-		args: params,
-		time: t,
-	}
+	l = msg.NewLine(message)
+	l.SetNick(nick)
+	l.SetIdent(ident)
+	l.SetHost(host)
+	l.SetSrc(src)
 
+	l.SetCmd(command)
+	l.SetArgs(params)
+	l.SetTime(t)
 	return
 
 }
 
 // ParseServerMsg parses an IRC message from an IRC server and outputs
 // a string ready to be printed out from the client.
-func ParseServerMsg(message string) (l *Line, err error) {
+func ParseServerMsg(message string) (l *msg.Line, err error) {
 	l, err = lexServerMsg(message)
 	if err != nil {
 		return
 	}
 	var output string
 	var context string
-	switch l.cmd {
+	switch l.Cmd() {
 	case "NOTICE":
-		output, context = notice(l.nick, l.args)
+		output, context = notice(l.Nick(), l.Args())
 	case "NICK":
-		output, context = nick(l.nick, l.args)
+		output, context = nick(l.Nick(), l.Args())
 	case "MODE":
-		output, context = mode(l.nick, l.args)
+		output, context = mode(l.Nick(), l.Args())
 	case "PRIVMSG":
-		output, context = privMsg(l.nick, l.args)
+		output, context = privMsg(l.Nick(), l.Args())
 	case "PART":
-		output, context = part(l.nick, l.args)
+		output, context = part(l.Nick(), l.Args())
 	case "JOIN":
-		output, context = join(l.nick, l.args)
+		output, context = join(l.Nick(), l.Args())
 	case "QUIT":
-		output, context = quit(l.nick, l.args)
+		output, context = quit(l.Nick(), l.Args())
 	case "328":
-		output, context, err = chanUrl(l.args)
+		output, context, err = chanUrl(l.Args())
 	case "329":
-		output, context, err = chanCreated(l.args)
+		output, context, err = chanCreated(l.Args())
 	case "332":
-		output, context, err = topic(l.args)
+		output, context, err = topic(l.Args())
 	case "333":
-		output, context, err = topicSetBy(l.args)
+		output, context, err = topicSetBy(l.Args())
 	default:
 		// check for numeric commands
 		r := regexp.MustCompile("^\\d+$")
-		if r.MatchString(l.cmd) {
-			l.output, l.context = numeric(l.nick, l.args)
+		if r.MatchString(l.Cmd()) {
+			output, context = numeric(l.Nick(), l.Args())
+		} else {
+			err = errors.New("Unknown command.")
 			return
 		}
-		err = errors.New("Unknown command.")
-		return
 	}
 	if err != nil {
 		return
 	}
 
-	l.output = output
-	l.context = context
+	l.SetOutput(output)
+	l.SetContext(context)
 	return
 }
 

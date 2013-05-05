@@ -11,9 +11,9 @@ func TestLexValidServerMsg(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	prefix := l.src
-	command := l.cmd
-	params := l.args
+	prefix := l.Src()
+	command := l.Cmd()
+	params := l.Args()
 
 	test.Check(t, prefix, "prefix")
 	test.Check(t, command, "COMMAND")
@@ -50,8 +50,8 @@ func TestJoin(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "_mrx has joined #chan"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
@@ -64,8 +64,8 @@ func TestMode(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "_mrx changed mode +i -l for #chan"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
@@ -78,8 +78,8 @@ func TestNotice(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "blabla.haxxor.com: Welcome"
 	expCont := "*"
 	test.Check(t, msg, expMsg)
@@ -92,8 +92,8 @@ func TestNoticeNoPrefix(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "<Server>: Welcome"
 	expCont := "*"
 	test.Check(t, msg, expMsg)
@@ -106,8 +106,8 @@ func TestQuit(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "_mrx has quit (Later suckerz)"
 	expCont := ""
 	test.Check(t, msg, expMsg)
@@ -120,8 +120,8 @@ func TestPart(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "_mrx has left #chan"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
@@ -134,8 +134,8 @@ func TestPrivMsg(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -151,7 +151,7 @@ func TestNick(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
+	msg := l.OutputMsg()
 	expMsg := "WiZ changed nick to Kilroy"
 	test.Check(t, msg, expMsg)
 }
@@ -162,8 +162,8 @@ func TestTopic(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "Topic for #chan is \"Welcome to chan!\""
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
@@ -176,8 +176,8 @@ func TestTopicSetBy(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "Topic set by marienz on Sat, 06 Apr 2013 03:12:39 UTC"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
@@ -190,8 +190,8 @@ func TestChannelURL(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "URL for #chan: http://chan.org/"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
@@ -204,8 +204,8 @@ func TestChannelCreation(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "Channel created on Fri, 09 Feb 2001 23:16:24 UTC"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
@@ -218,7 +218,7 @@ func TestNumeric(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	msg := l.output
+	msg := l.OutputMsg()
 	expMsg := "Something in the beginning"
 	test.Check(t, msg, expMsg)
 }
