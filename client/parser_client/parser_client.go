@@ -58,9 +58,8 @@ func Parse(message, nick, context string) (l *msg.Line,
 	if err != nil {
 		return
 	}
-	// quite ugly way to see if the context has changed.
-	// since empty context is allowed, the default value is valid
-	pr, cont := "", "$"
+	var pr string
+	var cont interface{}
 	switch l.Cmd() {
 	case "CHAN":
 		out, pr = chanMsg(nick, context, l.Args())
@@ -75,8 +74,10 @@ func Parse(message, nick, context string) (l *msg.Line,
 	if err != nil {
 		return
 	}
-	if cont != "$" {
-		context = cont
+	// since empty context is allowed, an empty interface and a
+	// type assertion test tells us if the context has changed
+	if c, ok := cont.(string); ok {
+		context = c
 	}
 	l.SetContext(context)
 	l.SetOutput(pr)
