@@ -84,7 +84,10 @@ func CreateChannelWindow(context string, cs *client.ConnectSession, notebook *gt
 
 	button := gtk.NewButtonWithLabel("Send")
 	button.Clicked(func (){
-		cs.Conn.Write(entry.GetText())
+		err := cs.Send(entry.GetText(), context)
+		if err != nil {
+			fmt.Println(err)
+		}
 		entry.SetText("")
 	})
 	hbox.Add(button)

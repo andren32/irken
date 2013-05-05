@@ -7,6 +7,7 @@ package client
 import (
 	"irken/client/msg"
 	"irken/client/parser_server"
+	"irken/client/parser_client"
 	"irken/irc"
 )
 
@@ -35,6 +36,19 @@ func NewConnectSession(addr string, nick string, realName string) (*ConnectSessi
 	cs.NewChannel("") // Default server channel
 
 	return cs, nil
+}
+
+func (cs *ConnectSession) Send(s, context string) error {
+	line, output, err := parser_client.Parse(s, cs.nick, context)
+	if err != nil {
+		return err
+	}
+	err = cs.Conn.Write(output)
+	if err != nil {
+		return err
+	}
+	cs.IrcChannels[context].Ch <- line
+	return nil
 }
 
 func (cs *ConnectSession) ReadToChannels() {
