@@ -3,10 +3,19 @@ package main
 import (
 	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
+	"github.com/mattn/go-gtk/gdk"
+	"irken/client"
+	"fmt"
+	"runtime"
 )
 
 func main() {
+	runtime.GOMAXPROCS(10)
+	glib.ThreadInit(nil)
+	gdk.ThreadsInit()
+	gdk.ThreadsEnter()
 	gtk.Init(nil)
+
 	window := gtk.NewWindow(gtk.WINDOW_TOPLEVEL)
 	window.SetPosition(gtk.WIN_POS_CENTER)
 	window.SetTitle("Irken")
@@ -15,6 +24,14 @@ func main() {
 		println("got destroy!", ctx.Data().(string))
 		gtk.MainQuit()
 	}, "foo")
+
+
+	cs, err := client.NewConnectSession("irc.freenode.net", "testurnstf", "whatever")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	cs.ReadToChannels()
 
 	//--------------------------------------------------------
 	// GtkVBox
@@ -25,8 +42,11 @@ func main() {
 	swin.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 	swin.SetShadowType(gtk.SHADOW_IN)
 	textview := gtk.NewTextView()
+	textview.SetEditable(false)
+	textview.SetCursorVisible(false)
+	textview.SetWrapMode(gtk.WRAP_WORD)
 	textview.SetSizeRequest(800, 600)
-	//buffer := textview.GetBuffer()
+	textbuffer := textview.GetBuffer()
 	swin.Add(textview)
 	vbox.Add(swin)
 
@@ -39,7 +59,8 @@ func main() {
 
 	button := gtk.NewButtonWithLabel("Send")
 	button.Clicked(func (){
-		println(entry.GetText())
+		cs.Conn.Write(entry.GetText())
+		entry.SetText("")
 	})
 	hbox.Add(button)
 
@@ -48,5 +69,32 @@ func main() {
 	window.Add(vbox)
 	window.SetSizeRequest(800, 640)
 	window.ShowAll()
+
+	cs.NewChannel("#freenode")
+
+	go func() {
+		for {
+			line := <-cs.IrcChannels[""].Ch
+			gdk.ThreadsEnter()
+			var endIter gtk.TextIter
+			textbuffer.GetEndIter(&endIter)
+			textbuffer.Insert(&endIter, line.Output())
+			textview.ScrollToIter(&endIter, 0.0, false, 0.0, 0.0)
+			gdk.ThreadsLeave()
+		}
+	}()
+
+	go func() {
+		for {
+			line := <-cs.IrcChannels["#freenode"].Ch
+			gdk.ThreadsEnter()
+			var endIter gtk.TextIter
+			textbuffer.GetEndIter(&endIter)
+			textbuffer.Insert(&endIter, line.Output())
+			textview.ScrollToIter(&endIter, 0.0, false, 0.0, 0.0)
+			gdk.ThreadsLeave()
+		}
+	}()
+
 	gtk.Main()
 }
