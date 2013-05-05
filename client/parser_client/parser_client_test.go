@@ -1,4 +1,4 @@
-package client
+package parser_client
 
 import (
 	"irken/test"
@@ -11,8 +11,8 @@ func TestLexClientCommand(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	arg := l.args[0]
-	cmd := l.cmd
+	arg := l.Args()[0]
+	cmd := l.Cmd()
 	expArg := "argument"
 	expCmd := "COMMAND"
 	test.Check(t, arg, expArg)
@@ -25,8 +25,8 @@ func TestLexClientMessage(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	arg := l.args[0]
-	cmd := l.cmd
+	arg := l.Args()[0]
+	cmd := l.Cmd()
 	expArg := "Hallo from another world!"
 	expCmd := "CHAN"
 	test.Check(t, arg, expArg)
@@ -39,8 +39,8 @@ func TestLexClientMessageEscapeChar(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	arg := l.args[0]
-	cmd := l.cmd
+	arg := l.Args()[0]
+	cmd := l.Cmd()
 	expArg := "/Hallo from another world!"
 	expCmd := "CHAN"
 	test.Check(t, arg, expArg)
@@ -63,8 +63,8 @@ func TestClientChanMsg(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	pr := l.output
-	cont := l.context
+	pr := l.OutputMsg()
+	cont := l.Context()
 
 	expCont := "#chan"
 	expOut := "PRIVMSG #chan :testing testing 123"
@@ -82,8 +82,8 @@ func TestClientJoinChan(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	pr := l.output
-	cont := l.context
+	pr := l.OutputMsg()
+	cont := l.Context()
 
 	expCont := "#chan"
 	expOut := "JOIN #chan"
@@ -101,8 +101,8 @@ func TestClientMe(t *testing.T) {
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
-	pr := l.output
-	cont := l.context
+	pr := l.OutputMsg()
+	cont := l.Context()
 
 	expCont := "#chan"
 	expOut := "PRIVMSG #chan :user is testing IRC"

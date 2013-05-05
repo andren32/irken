@@ -1,14 +1,15 @@
-package client
+package parser_client
 
 import (
 	"errors"
+	"irken/client/msg"
 	"regexp"
 	"strings"
 )
 
 // lexClientMsg scans a line inputted by the user of the client and outputs
 // the tokens in a Line struct
-func lexClientMsg(message string) (l *Line, err error) {
+func lexClientMsg(message string) (l *msg.Line, err error) {
 
 	var cmd string
 	var arg string
@@ -37,12 +38,11 @@ func lexClientMsg(message string) (l *Line, err error) {
 		arg = message
 	}
 
+	l = msg.NewLine(message)
+	l.SetCmd(cmd)
 	a := make([]string, 1)
 	a[0] = arg
-	l = &Line{
-		cmd: cmd, raw: message,
-		args: a,
-	}
+	l.SetArgs(a)
 
 	return
 }
@@ -52,7 +52,7 @@ func lexClientMsg(message string) (l *Line, err error) {
 // to the server
 // it outputs <Line> and empty string if the command is local to the client,
 // i.e. "/help join"
-func parseClientMsg(message, nick, context string) (l *Line,
+func parseClientMsg(message, nick, context string) (l *msg.Line,
 	out string, err error) {
 	l, err = lexClientMsg(message)
 	if err != nil {
@@ -61,13 +61,13 @@ func parseClientMsg(message, nick, context string) (l *Line,
 	// quite ugly way to see if the context has changed.
 	// since empty context is allowed, the default value is valid
 	pr, cont := "", "$"
-	switch l.cmd {
+	switch l.Cmd() {
 	case "CHAN":
-		out, pr = clChan(nick, context, l.args)
+		out, pr = clChan(nick, context, l.Args())
 	case "ME":
-		out, pr = clMe(nick, context, l.args)
+		out, pr = clMe(nick, context, l.Args())
 	case "JOIN":
-		out, pr, cont = clJoin(nick, l.args)
+		out, pr, cont = clJoin(nick, l.Args())
 	default:
 		err = errors.New("Unknown command")
 	}
@@ -78,8 +78,8 @@ func parseClientMsg(message, nick, context string) (l *Line,
 	if cont != "$" {
 		context = cont
 	}
-	l.context = context
-	l.output = pr
+	l.SetContext(context)
+	l.SetOutput(pr)
 
 	return
 }
