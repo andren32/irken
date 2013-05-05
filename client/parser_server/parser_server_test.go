@@ -46,7 +46,7 @@ func TestLexNoParams(t *testing.T) {
 
 func TestJoin(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com JOIN #chan"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -60,7 +60,7 @@ func TestJoin(t *testing.T) {
 
 func TestMode(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com MODE #chan +i -l"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -74,7 +74,7 @@ func TestMode(t *testing.T) {
 
 func TestNotice(t *testing.T) {
 	input := ":blabla.haxxor.com NOTICE * :Welcome"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -88,7 +88,7 @@ func TestNotice(t *testing.T) {
 
 func TestNoticeNoPrefix(t *testing.T) {
 	input := "NOTICE * :Welcome"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -102,7 +102,7 @@ func TestNoticeNoPrefix(t *testing.T) {
 
 func TestQuit(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com QUIT :Later suckerz"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -116,7 +116,7 @@ func TestQuit(t *testing.T) {
 
 func TestPart(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com PART #chan"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -130,7 +130,7 @@ func TestPart(t *testing.T) {
 
 func TestPrivMsg(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com PRIVMSG #chan :Octotastic! I like pie btw :)"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -147,7 +147,7 @@ func TestPrivMsg(t *testing.T) {
 
 func TestNick(t *testing.T) {
 	input := ":WiZ!jto@tolsun.oulu.fi NICK Kilroy"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -158,7 +158,7 @@ func TestNick(t *testing.T) {
 
 func TestTopic(t *testing.T) {
 	input := ":blabla.haxxor.com 332 axelri #chan :Welcome to chan!"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -172,7 +172,7 @@ func TestTopic(t *testing.T) {
 
 func TestTopicSetBy(t *testing.T) {
 	input := ":blabla.haxxor.com 333 user #chan marienz 1365217959"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -186,7 +186,7 @@ func TestTopicSetBy(t *testing.T) {
 
 func TestChannelURL(t *testing.T) {
 	input := ":services. 328 user #chan :http://chan.org/"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -200,7 +200,7 @@ func TestChannelURL(t *testing.T) {
 
 func TestChannelCreation(t *testing.T) {
 	input := ":blabla.haxxor.com 329 user #chan 981760584"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -214,7 +214,7 @@ func TestChannelCreation(t *testing.T) {
 
 func TestNumeric(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com 008 user :Something in the beginning"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}

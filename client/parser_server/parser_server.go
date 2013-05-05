@@ -67,9 +67,9 @@ func lexServerMsg(message string) (l *msg.Line, err error) {
 
 }
 
-// ParseServerMsg parses an IRC message from an IRC server and outputs
+// Parse parses an IRC message from an IRC server and outputs
 // a string ready to be printed out from the client.
-func ParseServerMsg(message string) (l *msg.Line, err error) {
+func Parse(message string) (l *msg.Line, err error) {
 	l, err = lexServerMsg(message)
 	if err != nil {
 		return

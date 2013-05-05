@@ -59,7 +59,7 @@ func TestClientChanMsg(t *testing.T) {
 	input := "testing testing 123"
 	nick := "user"
 	context := "#chan"
-	l, o, err := parseClientMsg(input, nick, context)
+	l, o, err := Parse(input, nick, context)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -78,7 +78,7 @@ func TestClientJoinChan(t *testing.T) {
 	input := "/join #chan"
 	nick := "user"
 	context := ""
-	l, o, err := parseClientMsg(input, nick, context)
+	l, o, err := Parse(input, nick, context)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
@@ -97,7 +97,7 @@ func TestClientMe(t *testing.T) {
 	input := "/me is testing IRC"
 	nick := "user"
 	context := "#chan"
-	l, o, err := parseClientMsg(input, nick, context)
+	l, o, err := Parse(input, nick, context)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}

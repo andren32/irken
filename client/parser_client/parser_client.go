@@ -47,12 +47,12 @@ func lexClientMsg(message string) (l *msg.Line, err error) {
 	return
 }
 
-// parseClientMsg parses a client message inputted by the user and outputs
+// Parse parses a client message inputted by the user and outputs
 // a Line struct (to be printed within the client) and an out string to be sent
 // to the server
 // it outputs <Line> and empty string if the command is local to the client,
 // i.e. "/help join"
-func parseClientMsg(message, nick, context string) (l *msg.Line,
+func Parse(message, nick, context string) (l *msg.Line,
 	out string, err error) {
 	l, err = lexClientMsg(message)
 	if err != nil {
@@ -63,11 +63,11 @@ func parseClientMsg(message, nick, context string) (l *msg.Line,
 	pr, cont := "", "$"
 	switch l.Cmd() {
 	case "CHAN":
-		out, pr = clChan(nick, context, l.Args())
+		out, pr = chanMsg(nick, context, l.Args())
 	case "ME":
-		out, pr = clMe(nick, context, l.Args())
+		out, pr = me(nick, context, l.Args())
 	case "JOIN":
-		out, pr, cont = clJoin(nick, l.Args())
+		out, pr, cont = join(nick, l.Args())
 	default:
 		err = errors.New("Unknown command")
 	}
@@ -84,20 +84,20 @@ func parseClientMsg(message, nick, context string) (l *msg.Line,
 	return
 }
 
-func clChan(nick, context string, params []string) (out, pr string) {
+func chanMsg(nick, context string, params []string) (out, pr string) {
 	out = "PRIVMSG " + context + " :" + params[0]
 	pr = nick + ": " + params[0]
 	return
 }
 
-func clJoin(nick string, params []string) (out, pr, context string) {
+func join(nick string, params []string) (out, pr, context string) {
 	context = params[0]
 	out = "JOIN " + params[0]
 	pr = nick + " joined " + params[0]
 	return
 }
 
-func clMe(nick, context string, params []string) (out, pr string) {
+func me(nick, context string, params []string) (out, pr string) {
 	// TODO
 	return
 }
