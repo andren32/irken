@@ -69,3 +69,8 @@ func (cs *ConnectSession) NewChannel(context string) {
 func (cs *ConnectSession) DeleteChannel(context string) {
 	delete(cs.IrcChannels, context)
 }
+
+func (cs *ConnectSession) ChannelExist(context string) bool {
+	_, ok := cs.IrcChannels[context]
+	return ok
+}

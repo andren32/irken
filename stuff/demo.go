@@ -33,6 +33,31 @@ func main() {
 
 	cs.ReadToChannels()
 
+	notebook := gtk.NewNotebook()
+
+	CreateChannelWindow("", cs, notebook)
+	CreateChannelWindow("#freenode", cs, notebook)
+	
+
+	window.Add(notebook)
+	window.SetSizeRequest(800, 640)
+	window.ShowAll()
+
+	gtk.Main()
+}
+
+func CreateChannelWindow(context string, cs *client.ConnectSession, notebook *gtk.Notebook) {
+	var page *gtk.Frame
+
+	if context == "" {
+		page = gtk.NewFrame("Server")
+		notebook.AppendPage(page, gtk.NewLabel("Server"))
+	} else {
+		cs.NewChannel(context)
+		page = gtk.NewFrame(context)
+		notebook.AppendPage(page, gtk.NewLabel(context))
+	}
+
 	//--------------------------------------------------------
 	// GtkVBox
 	//--------------------------------------------------------
@@ -45,7 +70,7 @@ func main() {
 	textview.SetEditable(false)
 	textview.SetCursorVisible(false)
 	textview.SetWrapMode(gtk.WRAP_WORD)
-	textview.SetSizeRequest(800, 600)
+	textview.SetSizeRequest(800, 500)
 	textbuffer := textview.GetBuffer()
 	swin.Add(textview)
 	vbox.Add(swin)
@@ -66,15 +91,11 @@ func main() {
 
 	vbox.Add(hbox)
 
-	window.Add(vbox)
-	window.SetSizeRequest(800, 640)
-	window.ShowAll()
-
-	cs.NewChannel("#freenode")
+	page.Add(vbox)
 
 	go func() {
 		for {
-			line := <-cs.IrcChannels[""].Ch
+			line := <-cs.IrcChannels[context].Ch
 			gdk.ThreadsEnter()
 			var endIter gtk.TextIter
 			textbuffer.GetEndIter(&endIter)
@@ -83,18 +104,4 @@ func main() {
 			gdk.ThreadsLeave()
 		}
 	}()
-
-	go func() {
-		for {
-			line := <-cs.IrcChannels["#freenode"].Ch
-			gdk.ThreadsEnter()
-			var endIter gtk.TextIter
-			textbuffer.GetEndIter(&endIter)
-			textbuffer.Insert(&endIter, line.Output())
-			textview.ScrollToIter(&endIter, 0.0, false, 0.0, 0.0)
-			gdk.ThreadsLeave()
-		}
-	}()
-
-	gtk.Main()
 }
