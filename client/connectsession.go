@@ -4,27 +4,68 @@
 // Also stores the nick.
 package client
 
-import "irken/irc"
+import (
+	"irken/client/msg"
+	"irken/client/parser_server"
+	"irken/irc"
+)
 
 type ConnectSession struct {
 	// user specific
 	nick string
 
 	// etc
-	conn *irc.Conn
-	bufs map[string]Buffer
+	Conn        *irc.Conn
+	IrcChannels map[string]*IRCChannel
 }
 
 func NewConnectSession(addr string, nick string, realName string) (*ConnectSession, error) {
-	conn, err := irc.NewConn(addr)
+
+	Conn, err := irc.NewConn(addr)
 	if err != nil {
 		return nil, err
 	}
-	bufs := make(map[string]Buffer)
+	ircChannels := make(map[string]*IRCChannel)
 
 	// Register the user
-	conn.Write("NICK " + nick + "\r\n")
-	conn.Write("USER " + nick + "0 *:" + realName + "\r\n")
+	Conn.Write("NICK " + nick + "\r\n")
+	Conn.Write("USER " + nick + " 0 * :" + realName + "\r\n")
 
-	return &ConnectSession{nick, conn, bufs}, nil
+	cs := &ConnectSession{nick, Conn, ircChannels}
+	cs.NewChannel("") // Default server channel
+
+	return cs, nil
+}
+
+func (cs *ConnectSession) ReadToChannels() {
+	go func() {
+		for {
+			s, err := cs.Conn.Read()
+			if err != nil {
+				// HANDLE ERROR...
+			}
+			line, err := parser_server.Parse(s)
+
+			if err != nil {
+				// HANDLE ERROR...
+			}
+
+			value, ok := cs.IrcChannels[line.Context()]
+			if !ok {
+				cs.IrcChannels[""].Ch <- line
+			} else {
+				value.Ch <- line
+			}
+
+		}
+	}()
+}
+
+func (cs *ConnectSession) NewChannel(context string) {
+	cs.IrcChannels[context] = &IRCChannel{Ch: make(chan *msg.Line)}
+	//TODO errorstuff
+}
+
+func (cs *ConnectSession) DeleteChannel(context string) {
+	delete(cs.IrcChannels, context)
 }

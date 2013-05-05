@@ -1,19 +1,19 @@
-package client
+package parser_server
 
 import (
 	"irken/test"
 	"testing"
 )
 
-func TestLexValid(t *testing.T) {
+func TestLexValidServerMsg(t *testing.T) {
 	message := ":prefix COMMAND param1 param2 :param 3 :-) yeah!?"
-	l, err := lexMsg(message)
+	l, err := lexServerMsg(message)
 	if err != nil {
-		t.Error(err)
+		test.UnExpErr(t, err)
 	}
-	prefix := l.src
-	command := l.cmd
-	params := l.args
+	prefix := l.Src()
+	command := l.Cmd()
+	params := l.Args()
 
 	test.Check(t, prefix, "prefix")
 	test.Check(t, command, "COMMAND")
@@ -22,14 +22,14 @@ func TestLexValid(t *testing.T) {
 	test.Check(t, params[2], "param 3 :-) yeah!?")
 }
 
-func TestLexInValid(t *testing.T) {
+func TestLexInValidServerMsg(t *testing.T) {
 	message := ":prefix"
 	message2 := ":prefix "
-	_, err := lexMsg(message)
+	_, err := lexServerMsg(message)
 	if err == nil {
 		t.Errorf("Illegal message is not error reported")
 	}
-	_, err = lexMsg(message2)
+	_, err = lexServerMsg(message2)
 	if err == nil {
 		t.Errorf("Illegal message is not error reported")
 	}
@@ -38,20 +38,20 @@ func TestLexInValid(t *testing.T) {
 
 func TestLexNoParams(t *testing.T) {
 	message := "COMMAND"
-	_, err := lexMsg(message)
+	_, err := lexServerMsg(message)
 	if err != nil {
-		t.Errorf("Should parse")
+		test.UnExpErr(t, err)
 	}
 }
 
 func TestJoin(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com JOIN #chan"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
-		t.Errorf("Should parse!")
+		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "_mrx has joined #chan"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
@@ -60,12 +60,12 @@ func TestJoin(t *testing.T) {
 
 func TestMode(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com MODE #chan +i -l"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
-		t.Errorf("Should parse!")
+		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "_mrx changed mode +i -l for #chan"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
@@ -74,12 +74,12 @@ func TestMode(t *testing.T) {
 
 func TestNotice(t *testing.T) {
 	input := ":blabla.haxxor.com NOTICE * :Welcome"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
-		t.Errorf("Should parse!")
+		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "blabla.haxxor.com: Welcome"
 	expCont := "*"
 	test.Check(t, msg, expMsg)
@@ -88,12 +88,12 @@ func TestNotice(t *testing.T) {
 
 func TestNoticeNoPrefix(t *testing.T) {
 	input := "NOTICE * :Welcome"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
-		t.Errorf("Should parse!")
+		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "<Server>: Welcome"
 	expCont := "*"
 	test.Check(t, msg, expMsg)
@@ -102,12 +102,12 @@ func TestNoticeNoPrefix(t *testing.T) {
 
 func TestQuit(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com QUIT :Later suckerz"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
-		t.Errorf("Should parse!")
+		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "_mrx has quit (Later suckerz)"
 	expCont := ""
 	test.Check(t, msg, expMsg)
@@ -116,12 +116,12 @@ func TestQuit(t *testing.T) {
 
 func TestPart(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com PART #chan"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
-		t.Errorf("Should parse!")
+		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	expMsg := "_mrx has left #chan"
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
@@ -130,14 +130,14 @@ func TestPart(t *testing.T) {
 
 func TestPrivMsg(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com PRIVMSG #chan :Octotastic! I like pie btw :)"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
-		t.Errorf("Should parse!")
+		test.UnExpErr(t, err)
 	}
-	msg := l.output
-	cont := l.context
+	msg := l.OutputMsg()
+	cont := l.Context()
 	if err != nil {
-		t.Errorf("Should parse!")
+		test.UnExpErr(t, err)
 	}
 	expMsg := "_mrx: Octotastic! I like pie btw :)"
 	expCont := "#chan"
@@ -145,13 +145,80 @@ func TestPrivMsg(t *testing.T) {
 	test.Check(t, cont, expCont)
 }
 
+func TestNick(t *testing.T) {
+	input := ":WiZ!jto@tolsun.oulu.fi NICK Kilroy"
+	l, err := Parse(input)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	msg := l.OutputMsg()
+	expMsg := "WiZ changed nick to Kilroy"
+	test.Check(t, msg, expMsg)
+}
+
+func TestTopic(t *testing.T) {
+	input := ":blabla.haxxor.com 332 axelri #chan :Welcome to chan!"
+	l, err := Parse(input)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	msg := l.OutputMsg()
+	cont := l.Context()
+	expMsg := "Topic for #chan is \"Welcome to chan!\""
+	expCont := "#chan"
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
+}
+
+func TestTopicSetBy(t *testing.T) {
+	input := ":blabla.haxxor.com 333 user #chan marienz 1365217959"
+	l, err := Parse(input)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	msg := l.OutputMsg()
+	cont := l.Context()
+	expMsg := "Topic set by marienz on Sat, 06 Apr 2013 03:12:39 UTC"
+	expCont := "#chan"
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
+}
+
+func TestChannelURL(t *testing.T) {
+	input := ":services. 328 user #chan :http://chan.org/"
+	l, err := Parse(input)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	msg := l.OutputMsg()
+	cont := l.Context()
+	expMsg := "URL for #chan: http://chan.org/"
+	expCont := "#chan"
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
+}
+
+func TestChannelCreation(t *testing.T) {
+	input := ":blabla.haxxor.com 329 user #chan 981760584"
+	l, err := Parse(input)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	msg := l.OutputMsg()
+	cont := l.Context()
+	expMsg := "Channel created on Fri, 09 Feb 2001 23:16:24 UTC"
+	expCont := "#chan"
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
+}
+
 func TestNumeric(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com 008 user :Something in the beginning"
-	l, err := ParseServerMsg(input)
+	l, err := Parse(input)
 	if err != nil {
-		t.Errorf("Should parse!")
+		test.UnExpErr(t, err)
 	}
-	msg := l.output
+	msg := l.OutputMsg()
 	expMsg := "Something in the beginning"
 	test.Check(t, msg, expMsg)
 }
@@ -164,7 +231,7 @@ func TestResolveValidPrefix(t *testing.T) {
 	expHost := "haxxor.com"
 	expSrc := "_mrx!blabla@haxxor.com"
 	if err != nil {
-		t.Errorf("Should parse")
+		test.UnExpErr(t, err)
 	}
 
 	test.Check(t, nick, expNick)
@@ -177,7 +244,7 @@ func TestResolveEmptyPrefix(t *testing.T) {
 	input := ""
 	nick, ident, host, src, err := resolvePrefix(input)
 	if err != nil {
-		t.Errorf("Should not parse")
+		test.UnExpErr(t, err)
 	}
 	expNick := "<Server>"
 	expIdent := ""
@@ -198,7 +265,7 @@ func TestResolveServer(t *testing.T) {
 	expHost := ""
 	expSrc := "blabla.haxxor.com"
 	if err != nil {
-		t.Errorf("Should parse")
+		test.UnExpErr(t, err)
 	}
 
 	test.Check(t, nick, expNick)

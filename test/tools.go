@@ -61,5 +61,8 @@ func Check(t *testing.T, res, exp interface{}) {
 	if mess, diff := Diff(res, exp); diff {
 		t.Errorf("%s", mess)
 	}
+}
 
+func UnExpErr(t *testing.T, err error) {
+	t.Errorf("Should pass, got error \"%v\"", err)
 }

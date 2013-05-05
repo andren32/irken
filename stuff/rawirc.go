@@ -4,27 +4,44 @@ import (
 	"bufio"
 	"fmt"
 	"irken/client"
-	"irken/irc"
+	"irken/client/msg"
 	"os"
-	"strings"
-	"time"
 )
 
 func main() {
-	conn, err := irc.NewConn("irc.freenode.net")
+	cfg := client.NewConfig("config.cfg")
+	cfg.Load()
+	cfgValues := cfg.GetCfgValues()
+
+	nick := cfgValues["NICK"]
+	realName := cfgValues["REAL_NAME"]
+
+	cs, err := client.NewConnectSession("irc.freenode.net", nick, realName)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	cs.IrcChannels["#freenode"] = &client.IRCChannel{Ch: make(chan *msg.Line)}
+	cs.ReadToChannels()
 
 	go func() {
 		for {
-			s, _ := conn.Read()
-			s = strings.TrimSpace(strings.Replace(s, "\n", "", -1))
-			line, err := client.ParseServerMsg(s)
-			if err != nil {
-				fmt.Println(s)
-			} else {
-				fmt.Println(line.Output())
-			}
+			line := <-cs.IrcChannels[""].Ch
+			fmt.Println(line.Raw())
+			fmt.Print("SERVER WINDOW: ")
+			fmt.Println(line.Output())
 		}
 	}()
+
+	go func() {
+		for {
+			line := <-cs.IrcChannels["#freenode"].Ch
+			fmt.Println(line.Raw())
+			fmt.Print("FREENODE: ")
+			fmt.Println(line.Output())
+		}
+	}()
+
 	go func() {
 		for {
 			in := bufio.NewReader(os.Stdin)
@@ -32,18 +49,9 @@ func main() {
 			if err != nil {
 				continue
 			}
-			conn.Write(input)
+			cs.Conn.Write(input)
 		}
 	}()
 
-	time.Sleep(time.Second * 3)
-	err = conn.Write("USER testurnstf irken irken:Hejsan karlsson")
-	err = conn.Write("NICK testurnstf")
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	select {}
-
-	//fmt.Println(client.ParseInData(":nyuszika7h!nyuszika7h@pdpc/supporter/active/nyuszika7h PRIVMSG #freenode :ppooooo :) sfdsldkfökakfa :(:(:(:(:(:(:(:())))))))"))
 }
