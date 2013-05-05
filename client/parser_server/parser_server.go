@@ -1,4 +1,4 @@
-package client
+package parser_server
 
 import (
 	"errors"

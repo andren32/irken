@@ -4,7 +4,11 @@
 // Also stores the nick.
 package client
 
-import "irken/irc"
+import (
+	"irken/client/msg"
+	"irken/client/parser_server"
+	"irken/irc"
+)
 
 type ConnectSession struct {
 	// user specific
@@ -38,9 +42,9 @@ func (cs *ConnectSession) ReadToChannels() {
 		for {
 			s, err := cs.Conn.Read()
 			if err != nil {
-				// HANDLE ERROR...	
+				// HANDLE ERROR...
 			}
-			line, err := ParseServerMsg(s)
+			line, err := parser_server.Parse(s)
 
 			if err != nil {
 				// HANDLE ERROR...
@@ -58,7 +62,7 @@ func (cs *ConnectSession) ReadToChannels() {
 }
 
 func (cs *ConnectSession) NewChannel(context string) {
-	cs.IrcChannels[context] = &IRCChannel{Ch: make(chan *Line)}
+	cs.IrcChannels[context] = &IRCChannel{Ch: make(chan *msg.Line)}
 	//TODO errorstuff
 }
 

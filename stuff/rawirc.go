@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"irken/client"
+	"irken/client/msg"
 	"os"
 )
 
@@ -20,7 +21,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	cs.IrcChannels["#freenode"] = &client.IRCChannel{Ch: make(chan *client.Line)}
+	cs.IrcChannels["#freenode"] = &client.IRCChannel{Ch: make(chan *msg.Line)}
 	cs.ReadToChannels()
 
 	go func() {
