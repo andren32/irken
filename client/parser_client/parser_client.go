@@ -12,7 +12,7 @@ import (
 func lexClientMsg(message string) (l *msg.Line, err error) {
 
 	var cmd string
-	var arg string
+	var args string
 	// a slash followed by any non-word char is an invalid command
 	r := "^/\\W+"
 	regex := regexp.MustCompile(r)
@@ -25,23 +25,31 @@ func lexClientMsg(message string) (l *msg.Line, err error) {
 		cmdEnd := strings.Index(message, " ")
 		if cmdEnd == -1 {
 			cmd = strings.ToUpper(message[1:])
-			arg = ""
+			args = ""
 		} else {
 			cmd = strings.ToUpper(message[1:cmdEnd])
-			arg = message[cmdEnd+1:]
+			args = message[cmdEnd+1:]
 		}
 	} else if strings.HasPrefix(message, "\\/") {
 		cmd = "CHAN"
-		arg = message[1:]
+		args = message[1:]
 	} else {
 		cmd = "CHAN"
-		arg = message
+		args = message
+	}
+
+	a := make([]string, 0)
+	// no need to split command arguments
+	if cmd == "CHAN" {
+		a = append(a, args)
+	} else {
+		for _, s := range strings.Fields(args) {
+			a = append(a, s)
+		}
 	}
 
 	l = msg.NewLine(message)
 	l.SetCmd(cmd)
-	a := make([]string, 1)
-	a[0] = arg
 	l.SetArgs(a)
 
 	return
@@ -63,10 +71,16 @@ func Parse(message, nick, context string) (l *msg.Line,
 	switch l.Cmd() {
 	case "CHAN":
 		out, pr = chanMsg(nick, context, l.Args())
+	case "MSG":
+		out, pr, cont = privMsg(nick, l.Args())
 	case "ME":
 		out, pr = me(nick, context, l.Args())
 	case "JOIN":
 		out, pr, cont = join(nick, l.Args())
+	case "PART":
+		out, pr = part(nick, context)
+	case "QUIT":
+		out, pr = quit(nick, l.Args())
 	default:
 		err = errors.New("Unknown command")
 	}
@@ -91,6 +105,14 @@ func chanMsg(nick, context string, params []string) (out, pr string) {
 	return
 }
 
+func privMsg(nick string, params []string) (out, pr, context string) {
+	context = params[0]
+	msg := concatArgs(params[1:])
+	out = "PRIVMSG " + context + " :" + msg
+	pr = nick + ": " + msg
+	return
+}
+
 func join(nick string, params []string) (out, pr, context string) {
 	context = params[0]
 	out = "JOIN " + params[0]
@@ -98,7 +120,24 @@ func join(nick string, params []string) (out, pr, context string) {
 	return
 }
 
+func part(nick, context string) (out, pr string) {
+	out = "PART " + context
+	pr = nick + " has left " + context
+	return
+}
+
+func quit(nick string, params []string) (out, pr string) {
+	msg := concatArgs(params)
+	out = "QUIT :" + msg
+	pr = nick + " has quit (" + msg + ")"
+	return
+}
+
 func me(nick, context string, params []string) (out, pr string) {
 	// TODO
 	return
+}
+
+func concatArgs(args []string) string {
+	return strings.Join(args, " ")
 }

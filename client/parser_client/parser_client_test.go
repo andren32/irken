@@ -47,6 +47,23 @@ func TestLexClientMessageEscapeChar(t *testing.T) {
 	test.Check(t, cmd, expCmd)
 }
 
+func TestLexClientMessageWithArgs(t *testing.T) {
+	input := "/command arg1 arg2"
+	l, err := lexClientMsg(input)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	arg1 := l.Args()[0]
+	arg2 := l.Args()[1]
+	cmd := l.Cmd()
+	expArg1 := "arg1"
+	expArg2 := "arg2"
+	expCmd := "COMMAND"
+	test.Check(t, arg1, expArg1)
+	test.Check(t, arg2, expArg2)
+	test.Check(t, cmd, expCmd)
+}
+
 func TestLexClientInvalidMessage(t *testing.T) {
 	input := "/*^Hallo from another world!"
 	_, err := lexClientMsg(input)
@@ -117,13 +134,58 @@ func TestClientHelp(t *testing.T) {
 }
 
 func TestClientPart(t *testing.T) {
-	// TODO
+	input := "/part"
+	nick := "user"
+	context := "#chan"
+	l, o, err := Parse(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.OutputMsg()
+	cont := l.Context()
+
+	expCont := "#chan"
+	expOut := "PART #chan"
+	expPr := "user has left #chan"
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+	test.Check(t, cont, expCont)
 }
 
 func TestClientQuit(t *testing.T) {
-	// TODO
+	input := "/quit Going to sleep"
+	nick := "user"
+	context := "#chan"
+	l, o, err := Parse(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.OutputMsg()
+	cont := l.Context()
+
+	expCont := "#chan"
+	expOut := "QUIT :Going to sleep"
+	expPr := "user has quit (Going to sleep)"
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+	test.Check(t, cont, expCont)
 }
 
 func TestClientMsg(t *testing.T) {
-	// TODO
+	input := "/msg otheruser Hi there"
+	nick := "user"
+	context := "#chan"
+	l, o, err := Parse(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.OutputMsg()
+	cont := l.Context()
+
+	expCont := "otheruser"
+	expOut := "PRIVMSG otheruser :Hi there"
+	expPr := "user: Hi there"
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+	test.Check(t, cont, expCont)
 }
