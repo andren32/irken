@@ -25,10 +25,10 @@ func lexClientMsg(message string) (l *msg.Line, err error) {
 	if strings.HasPrefix(message, "/") {
 		cmdEnd := strings.Index(message, " ")
 		if cmdEnd == -1 {
-			cmd = strings.ToUpper(message[1:])
+			cmd = "C" + strings.ToUpper(message[1:])
 			args = ""
 		} else {
-			cmd = strings.ToUpper(message[1:cmdEnd])
+			cmd = "C" + strings.ToUpper(message[1:cmdEnd])
 			args = message[cmdEnd+1:]
 		}
 	} else if strings.HasPrefix(message, "\\/") {
@@ -72,16 +72,18 @@ func Parse(message, nick, context string) (l *msg.Line,
 	switch l.Cmd() {
 	case "CHAN":
 		out, pr = chanMsg(nick, context, l.Args())
-	case "MSG":
+	case "CMSG":
 		out, pr, cont = privMsg(nick, l.Args())
-	case "ME":
+	case "CME":
 		out, pr = me(nick, context, l.Args())
-	case "JOIN":
+	case "CJOIN":
 		out, pr, cont = join(nick, l.Args())
-	case "PART":
+	case "CPART":
 		out, pr = part(nick, context)
-	case "QUIT":
+	case "CQUIT":
 		out, pr = quit(nick, l.Args())
+	case "CCONNECT":
+		pr = connect(nick, l.Args())
 	default:
 		err = errors.New("Unknown command")
 	}
@@ -137,6 +139,12 @@ func quit(nick string, params []string) (out, pr string) {
 
 func me(nick, context string, params []string) (out, pr string) {
 	// TODO
+	return
+}
+
+// -- Client commands --
+func connect(nick string, params []string) (pr string) {
+	pr = nick + " connected to " + params[len(params)-1]
 	return
 }
 

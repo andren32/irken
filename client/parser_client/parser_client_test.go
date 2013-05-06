@@ -14,7 +14,7 @@ func TestLexClientCommand(t *testing.T) {
 	arg := l.Args()[0]
 	cmd := l.Cmd()
 	expArg := "argument"
-	expCmd := "COMMAND"
+	expCmd := "CCOMMAND"
 	test.Check(t, arg, expArg)
 	test.Check(t, cmd, expCmd)
 }
@@ -58,7 +58,7 @@ func TestLexClientMessageWithArgs(t *testing.T) {
 	cmd := l.Cmd()
 	expArg1 := "arg1"
 	expArg2 := "arg2"
-	expCmd := "COMMAND"
+	expCmd := "CCOMMAND"
 	test.Check(t, arg1, expArg1)
 	test.Check(t, arg2, expArg2)
 	test.Check(t, cmd, expCmd)
@@ -185,6 +185,26 @@ func TestClientMsg(t *testing.T) {
 	expCont := "otheruser"
 	expOut := "PRIVMSG otheruser :Hi there"
 	expPr := "user: Hi there"
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+	test.Check(t, cont, expCont)
+}
+
+func TestServer(t *testing.T) {
+	input := "/connect irc.freenode.net"
+	nick := "user"
+	context := ""
+
+	l, o, err := Parse(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.OutputMsg()
+	cont := l.Context()
+
+	expCont := ""
+	expPr := "user connected to irc.freenode.net"
+	expOut := ""
 	test.Check(t, o, expOut)
 	test.Check(t, pr, expPr)
 	test.Check(t, cont, expCont)
