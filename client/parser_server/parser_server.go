@@ -99,6 +99,8 @@ func Parse(message string) (l *msg.Line, err error) {
 		output, context, err = topic(l.Args())
 	case "333":
 		output, context, err = topicSetBy(l.Args())
+	case "353":
+		output, context = nicks(l.Args())
 	default:
 		// check for numeric commands
 		r := regexp.MustCompile("^\\d+$")
@@ -218,6 +220,12 @@ func chanCreated(params []string) (output, context string, err error) {
 
 func numeric(nick string, params []string) (output, context string) {
 	context = params[0]
+	output = params[len(params)-1]
+	return
+}
+
+func nicks(params []string) (output, context string) {
+	context = params[2]
 	output = params[len(params)-1]
 	return
 }

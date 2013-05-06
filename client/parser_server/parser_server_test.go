@@ -212,6 +212,20 @@ func TestChannelCreation(t *testing.T) {
 	test.Check(t, cont, expCont)
 }
 
+func TestNicks(t *testing.T) {
+	input := ":blabla.haxxor.com 353 user = #chan :user1 user2"
+	l, err := Parse(input)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	msg := l.OutputMsg()
+	cont := l.Context()
+	expCont := "#chan"
+	expMsg := "user1 user2"
+	test.Check(t, cont, expCont)
+	test.Check(t, msg, expMsg)
+}
+
 func TestNumeric(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com 008 user :Something in the beginning"
 	l, err := Parse(input)
