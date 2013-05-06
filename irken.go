@@ -6,7 +6,6 @@ import (
 	"github.com/mattn/go-gtk/gtk"
 	"github.com/mattn/go-gtk/gdk"
 	"irken/gui"
-	"fmt"
 )
 
 func main() {
