@@ -16,6 +16,7 @@ type GUI struct {
 type Page struct {
 	textView *gtk.TextView 
 	nickTV *gtk.TextView
+	entry *gtk.Entry
 }
 
 func NewGUI(title string, width, height int) *GUI {
@@ -42,7 +43,7 @@ func (gui *GUI) StartMain() {
 	gtk.Main()
 }
 
-func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
+func (gui *GUI) CreateChannelWindow (context string, buttonFunc func()) {
 	var page *gtk.Frame
 
 	if context == "" {
@@ -94,9 +95,6 @@ func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
 		hbox1.Add(swin)
 	}
 
-	newPage := &Page{textView: textView, nickTV: nickTV}
-	gui.pages[context] = newPage
-
 	vbox.Add(hbox1)
 	hbox2 := gtk.NewHBox(false, 1)
 
@@ -113,5 +111,10 @@ func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
 
 	page.Add(vbox)
 
+	newPage := &Page{textView: textView, nickTV: nickTV, entry: entry}
+	gui.pages[context] = newPage
+}
 
+func (gui *GUI) DeleteCurrentWindow() {
+	gui.notebook.RemovePage(nil, gui.notebook.GetCurrentPage())
 }
