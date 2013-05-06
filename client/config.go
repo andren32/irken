@@ -16,8 +16,14 @@ type Config struct {
 
 // NewConfig takes a filename, open or creates the file depending on if it
 // exists or not and return a pointer to a Config type.
-func NewConfig(fileName string) *Config {
-	return &Config{make(map[string]string), fileName}
+func NewConfig(fileName string) (c *Config, err error) {
+	c = &Config{make(map[string]string), fileName}
+	err = c.Load()
+	if err != nil {
+		c = &Config{make(map[string]string), fileName}
+		return
+	}
+	return
 }
 
 // Adds a config value. If it already exists it is overwritten with the new value

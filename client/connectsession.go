@@ -2,18 +2,19 @@
 // each channel and output ready to be written
 // ready to be written to the screen.
 // Also stores the nick.
+// TODO: Add the methods used in app/app.go
 package client
 
 import (
 	"irken/client/msg"
-	"irken/client/parser_server"
 	"irken/client/parser_client"
+	"irken/client/parser_server"
 	"irken/irc"
 )
 
 type ConnectSession struct {
 	// user specific
-	nick string
+	nick     string
 	realName string
 	// etc
 	Conn        *irc.Conn
