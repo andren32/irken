@@ -14,28 +14,36 @@ import (
 type ConnectSession struct {
 	// user specific
 	nick string
-
+	realName string
 	// etc
 	Conn        *irc.Conn
 	IrcChannels map[string]*IRCChannel
 }
 
-func NewConnectSession(addr string, nick string, realName string) (*ConnectSession, error) {
+func NewConnectSession(nick string, realName string) *ConnectSession {
+	ircChannels := make(map[string]*IRCChannel)
+	cs := &ConnectSession{IrcChannels: ircChannels, realName: realName, nick: nick}
+	cs.NewChannel("")
+	return cs
+}
 
+func (cs *ConnectSession) Connect(addr string) error {
 	Conn, err := irc.NewConn(addr)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	ircChannels := make(map[string]*IRCChannel)
-
 	// Register the user
-	Conn.Write("NICK " + nick + "\r\n")
-	Conn.Write("USER " + nick + " 0 * :" + realName + "\r\n")
+	err = Conn.Write("NICK " + cs.nick + "\r\n")
+	if err != nil {
+		return err
+	}
+	err = Conn.Write("USER " + cs.nick + " 0 * :" + cs.realName + "\r\n")
+	if err != nil {
+		return err
+	}
 
-	cs := &ConnectSession{nick, Conn, ircChannels}
-	cs.NewChannel("") // Default server channel
-
-	return cs, nil
+	cs.Conn = Conn
+	return nil
 }
 
 func (cs *ConnectSession) Send(s, context string) error {
