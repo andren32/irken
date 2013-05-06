@@ -1,11 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
-	"github.com/mattn/go-gtk/gdk"
 	"irken/client"
-	"fmt"
 	"runtime"
 )
 
@@ -25,7 +25,6 @@ func main() {
 		gtk.MainQuit()
 	}, "foo")
 
-
 	cs, err := client.NewConnectSession("irc.freenode.net", "testurnstf", "whatever")
 	if err != nil {
 		fmt.Println(err)
@@ -37,7 +36,6 @@ func main() {
 
 	CreateChannelWindow("", cs, notebook)
 	CreateChannelWindow("#freenode", cs, notebook)
-	
 
 	window.Add(notebook)
 	window.SetSizeRequest(800, 640)
@@ -83,7 +81,7 @@ func CreateChannelWindow(context string, cs *client.ConnectSession, notebook *gt
 	hbox.Add(entry)
 
 	button := gtk.NewButtonWithLabel("Send")
-	button.Clicked(func (){
+	button.Clicked(func() {
 		err := cs.Send(entry.GetText(), context)
 		if err != nil {
 			fmt.Println(err)
@@ -102,7 +100,7 @@ func CreateChannelWindow(context string, cs *client.ConnectSession, notebook *gt
 			gdk.ThreadsEnter()
 			var endIter gtk.TextIter
 			textbuffer.GetEndIter(&endIter)
-			textbuffer.Insert(&endIter, line.Output())
+			textbuffer.Insert(&endIter, line.Output()+"\n")
 			textview.ScrollToIter(&endIter, 0.0, false, 0.0, 0.0)
 			gdk.ThreadsLeave()
 		}

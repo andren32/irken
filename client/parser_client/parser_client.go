@@ -5,6 +5,7 @@ import (
 	"irken/client/msg"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // lexClientMsg scans a line inputted by the user of the client and outputs
@@ -95,6 +96,7 @@ func Parse(message, nick, context string) (l *msg.Line,
 	}
 	l.SetContext(context)
 	l.SetOutput(pr)
+	l.SetTime(time.Now())
 
 	return
 }
