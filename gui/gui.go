@@ -5,6 +5,7 @@ import (
 	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
+	"unsafe"
 )
 
 type GUI struct {
@@ -57,7 +58,7 @@ func (gui *GUI) StartMain() {
 	gdk.ThreadsLeave()
 }
 
-func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
+func (gui *GUI) CreateChannelWindow(context string, sendFunc func()) {
 	var page *gtk.Frame
 
 	if context == "" {
@@ -115,10 +116,17 @@ func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
 	// entry
 	entry := gtk.NewEntry()
 	entry.SetSizeRequest(700, 40)
+	entry.Connect("key-press-event", func(ctx *glib.CallbackContext) {
+		arg := ctx.Args(0)
+		kev := *(**gdk.EventKey)(unsafe.Pointer(&arg))
+		if kev.Keyval == gdk.KEY_Return {
+			sendFunc()
+		}
+	})
 	hbox2.Add(entry)
 
 	button := gtk.NewButtonWithLabel("Send")
-	button.Clicked(buttonFunc)
+	button.Clicked(sendFunc)
 	hbox2.Add(button)
 
 	vbox.Add(hbox2)
