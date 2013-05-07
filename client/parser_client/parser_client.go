@@ -156,8 +156,14 @@ func me(nick, context string, params []string) (out, pr string) {
 }
 
 func ping(nick string, params []string) (out, pr string) {
-	out = "PING :" + params[0]
-	pr = nick + " pinged " + params[0]
+	var target string
+	if len(params) == 0 {
+		target = ""
+	} else {
+		target = params[0]
+	}
+	out = "PING :" + target
+	pr = nick + " pinged " + target
 	return
 }
 

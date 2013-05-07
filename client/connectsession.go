@@ -90,7 +90,6 @@ func (cs *ConnectSession) stopPings() {
 
 func (cs *ConnectSession) Send(s, context string) error {
 	line, output, err := parser_client.Parse(s, cs.nick, context)
-	fmt.Println(line.Output())
 	if err != nil {
 		return err
 	}

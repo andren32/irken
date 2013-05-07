@@ -241,7 +241,6 @@ func TestPing(t *testing.T) {
 	expOut := "PING :target"
 	test.Check(t, o, expOut)
 	test.Check(t, pr, expPr)
-
 }
 
 func TestHelp(t *testing.T) {
