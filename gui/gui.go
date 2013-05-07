@@ -220,17 +220,18 @@ func (gui *GUI) AutoScroll(textbuffer *gtk.TextBuffer, endIter *gtk.TextIter) {
 }
 
 func (gui *GUI) GetEntryBuffer(context string) (string, error) {
-	page, ok := pages[context]
+	page, ok := gui.pages[context]
 	if !ok {
 		return "", errors.New("GetEntryBuffer: No such window!")
 	}
-	return page.entry.GetBuffer(), nil
+	return page.entry.GetText(), nil
 }
 
-func (gui *GUI) EmptyEntryBuffer(context) {
-	page, ok := pages[context]
+func (gui *GUI) EmptyEntryBuffer(context string) error {
+	page, ok := gui.pages[context]
 	if !ok {
-		return "", errors.New("GetEntryBuffer: No such window!")
+		return errors.New("EmptyEntryBuffer: No such window!")
 	}
-	page.entry.SetBuffer("")
+	page.entry.SetText("")
+	return nil
 }
