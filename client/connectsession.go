@@ -52,9 +52,12 @@ func (cs *ConnectSession) Send(s, context string) error {
 	if err != nil {
 		return err
 	}
-	err = cs.Conn.Write(output)
-	if err != nil {
-		return err
+
+	if cs.Conn != nil {
+		err = cs.Conn.Write(output)
+		if err != nil {
+			return err
+		}
 	}
 	cs.IrcChannels[context].Ch <- line
 	return nil

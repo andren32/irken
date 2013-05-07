@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"github.com/mattn/go-gtk/gdk"
 	"irken/client"
 	"irken/client/msg"
 	"irken/gui"
@@ -37,8 +38,29 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 	nick, _ := conf.GetCfgValue("nick")
 	realname, _ := conf.GetCfgValue("realname")
 	g := gui.NewGUI(DEFAULT_TITLE, wWidth, wHeight)
-	g.CreateChannelWindow(DEFAULT_CONT, func() {})
 	cs := client.NewConnectSession(nick, realname)
+	ia := &IrkenApp{
+		gui:      g,
+		cs:       cs,
+		conf:     conf,
+		handlers: make(map[string]Handler),
+	}
+	initHandlers(ia)
+
+	g.CreateChannelWindow(DEFAULT_CONT, func() {
+		text, err := g.GetEntryText("")
+		if err != nil {
+			err := g.WriteToChannel("Couldn't get input", "")
+			handleFatalErr(err)
+		}
+		err = ia.cs.Send(text, DEFAULT_CONT)
+		if err != nil {
+			err := g.WriteToChannel("Couldn't parse input", "")
+			handleFatalErr(err)
+		}
+		g.EmptyEntryText("")
+	})
+	ia.BeginInput("")
 
 	err := g.WriteToChannel("Welcome to Irken!", DEFAULT_CONT)
 	handleFatalErr(err)
@@ -52,25 +74,28 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 	err = g.WriteToChannel("Real name is "+realname, DEFAULT_CONT)
 	handleFatalErr(err)
 
-	ia := &IrkenApp{
-		gui:      g,
-		cs:       cs,
-		conf:     conf,
-		handlers: make(map[string]Handler),
-	}
-	initHandlers(ia)
-	ia.BeginInput()
 	return ia
 }
 
-func (ia *IrkenApp) BeginInput() {
+func (ia *IrkenApp) BeginInput(context string) {
 	go func() {
-		// TODO: Parse entry
+		for {
+			line := <-ia.cs.IrcChannels[context].Ch
+			fmt.Println(line.Output())
+			gdk.ThreadsEnter()
+			err := ia.handle(line)
+			if err != nil {
+				err := ia.gui.WriteToChannel(line.Output(), context)
+				handleFatalErr(err)
+			}
+			gdk.ThreadsLeave()
+		}
 	}()
+	return
 }
 
 func initHandlers(ia *IrkenApp) {
-	ia.handlers["CCONECT"] = func(l *msg.Line) {
+	ia.handlers["CCONNECT"] = func(l *msg.Line) {
 		addr := l.Args()[len(l.Args())-1]
 		err := ia.cs.Connect(addr)
 		if err != nil {
@@ -78,6 +103,8 @@ func initHandlers(ia *IrkenApp) {
 				addr, err)
 			err = ia.gui.WriteToChannel(errMsg, "")
 			handleFatalErr(err)
+		} else {
+			ia.cs.ReadToChannels()
 		}
 	}
 }

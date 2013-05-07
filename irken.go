@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"irken/app"
 	"runtime"
 )
@@ -12,10 +11,5 @@ func init() {
 
 func main() {
 	a := app.NewIrkenApp("../config.cfg")
-	go func() {
-		a.GUI().StartMain()
-	}()
-
-	fmt.Println("Got here!")
-	select {}
+	a.GUI().StartMain()
 }
