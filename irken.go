@@ -4,15 +4,20 @@ import (
 	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
-	"irken/gui"
+	"irken/app"
 	"runtime"
 )
 
-func main() {
+func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
+	glib.ThreadInit(nil)
+	gdk.ThreadsInit()
+	gdk.ThreadsEnter()
+	gtk.Init(nil)
+}
 
-	g := gui.NewGUI("Irken", 860, 640)
-	g.CreateChannelWindow("", func() {})
+func main() {
+	_ = app.NewIrkenApp("../config.cfg")
 
-	g.StartMain()
+	select {}
 }

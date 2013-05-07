@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
 )
@@ -130,10 +131,10 @@ func (gui *GUI) WriteToChannel(s, context string) {
 	textBuffer.GetEndIter(&endIter)
 	textBuffer.Insert(&endIter, s+"\n")
 
-	AutoScroll(textBuffer, &endIter)
+	gui.AutoScroll(textBuffer, &endIter)
 }
 
-func (gui *GUI) AutoScroll(textbuffer *gtk, TextBuffer, endIter *gtk.TextIter) {
+func (gui *GUI) AutoScroll(textbuffer *gtk.TextBuffer, endIter *gtk.TextIter) {
 	// TODO
 }
 
