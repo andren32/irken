@@ -10,9 +10,9 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"sort"
 	"strconv"
 	"strings"
-	"sort"
 )
 
 const DEFAULT_TITLE = "Irken"

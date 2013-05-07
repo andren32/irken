@@ -78,12 +78,23 @@ func Parse(message, nick, context string) (l *msg.Line,
 		out, pr = me(nick, context, l.Args())
 	case "CJOIN":
 		out, pr, cont = join(nick, l.Args())
+	case "CLEAVE":
+		out, pr = part(nick, context)
+		l.SetCmd("CPART")
 	case "CPART":
 		out, pr = part(nick, context)
+	case "CEXIT":
+		out, pr = quit(nick, l.Args())
+		l.SetCmd("CQUIT")
 	case "CQUIT":
 		out, pr = quit(nick, l.Args())
 	case "CCONNECT":
 		pr = connect(nick, l.Args())
+	case "CDISCONNECT":
+		out, pr = disconnect(nick, l.Args())
+	case "CHELP":
+		// only arguments are important
+		out, pr = "", ""
 	default:
 		err = errors.New("Unknown command")
 	}
@@ -145,6 +156,13 @@ func me(nick, context string, params []string) (out, pr string) {
 // -- Client commands --
 func connect(nick string, params []string) (pr string) {
 	pr = nick + " connected to " + params[len(params)-1]
+	return
+}
+
+func disconnect(nick string, params []string) (out, pr string) {
+	msg := concatArgs(params)
+	out = "QUIT :" + msg
+	pr = nick + " disconnected"
 	return
 }
 
