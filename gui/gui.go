@@ -54,6 +54,7 @@ func NewGUI(title string, width, height int) *GUI {
 func (gui *GUI) StartMain() {
 	gui.window.ShowAll()
 	gtk.Main()
+	gdk.ThreadsLeave()
 }
 
 func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
@@ -133,6 +134,7 @@ func (gui *GUI) DeleteCurrentWindow() {
 }
 
 func (gui *GUI) WriteToChannel(s, context string) error {
+	gdk.ThreadsEnter()
 	var endIter gtk.TextIter
 	page, ok := gui.pages[context]
 	if !ok {
@@ -143,43 +145,33 @@ func (gui *GUI) WriteToChannel(s, context string) error {
 	textBuffer.Insert(&endIter, s+"\n")
 
 	gui.AutoScroll(textBuffer, &endIter)
+	gdk.ThreadsLeave()
 	return nil
 }
 func (gui *GUI) WriteToNicks(s, context string) error {
-	ch := make(chan error)
-	go func() {
-		page, ok := gui.pages[context]
-		if !ok {
-			ch <- errors.New("WriteToChannel: No Such Window!")
-			return
-		}
-		ch <- nil
-		gdk.ThreadsEnter()
-		var endIter gtk.TextIter
-		textBuffer := page.textView.GetBuffer()
-		textBuffer.GetEndIter(&endIter)
-		textBuffer.Insert(&endIter, s+"\n")
-		gdk.ThreadsLeave()
-	}()
-
-	return <-ch
+	gdk.ThreadsEnter()
+	page, ok := gui.pages[context]
+	if !ok {
+		return errors.New("WriteToChannel: No Such Window!")
+	}
+	var endIter gtk.TextIter
+	textBuffer := page.textView.GetBuffer()
+	textBuffer.GetEndIter(&endIter)
+	textBuffer.Insert(&endIter, s+"\n")
+	gdk.ThreadsLeave()
+	return nil
 }
 
 func (gui *GUI) EmptyNicks(s, context string) error {
-	ch := make(chan error)
-	go func() {
-		page, ok := gui.pages[context]
-		if !ok {
-			ch <- errors.New("WriteToChannel: No Such Window!")
-			return
-		}
-		ch <- nil
-		gdk.ThreadsEnter()
-		textBuffer := page.nickTV.GetBuffer()
-		textBuffer.SetText("")
-		gdk.ThreadsLeave()
-	}()
-	return <-ch
+	gdk.ThreadsEnter()
+	page, ok := gui.pages[context]
+	if !ok {
+		return errors.New("WriteToChannel: No Such Window!")
+	}
+	textBuffer := page.nickTV.GetBuffer()
+	textBuffer.SetText("")
+	gdk.ThreadsLeave()
+	return nil
 }
 
 func (gui *GUI) AutoScroll(textbuffer *gtk.TextBuffer, endIter *gtk.TextIter) {
