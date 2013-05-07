@@ -129,6 +129,22 @@ func initHandlers(ia *IrkenApp) {
 		}
 	}
 
+	// ia.handlers["CDISCONNECT"] = func(l *msg.Line) {
+	// 	if !ia.cs.IsConnected() {
+	// 		err := ia.gui.WriteToChannel("You are not connected to any server", "")
+	// 		handleFatalErr(err)
+	// 	}
+
+	// 	for context, _ := range ia.listeners {
+	// 		if context != "" {
+	// 			ia.cs.DeleteChannel(context)
+	// 			ia.gui.DeleteCurrentWindow
+	// 		}
+	// 		ia.cs.CloseConnection()
+	// 	}
+
+	// }
+
 	ia.handlers["CJOIN"] = func(l *msg.Line) {
 		if !ia.cs.IsConnected() {
 			err := ia.gui.WriteToChannel("Error: Not connected to any server",
