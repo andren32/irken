@@ -19,11 +19,16 @@ type ConnectSession struct {
 	// etc
 	Conn        *irc.Conn
 	IrcChannels map[string]*IRCChannel
+	connected   bool
 }
 
 func NewConnectSession(nick string, realName string) *ConnectSession {
-	ircChannels := make(map[string]*IRCChannel)
-	cs := &ConnectSession{IrcChannels: ircChannels, realName: realName, nick: nick}
+	cs := &ConnectSession{
+		nick:        nick,
+		realName:    realName,
+		IrcChannels: make(map[string]*IRCChannel),
+		connected:   false,
+	}
 	cs.NewChannel("")
 	return cs
 }
@@ -44,6 +49,7 @@ func (cs *ConnectSession) Connect(addr string) error {
 	}
 
 	cs.Conn = Conn
+	cs.connected = true
 	cs.readToChannels()
 	return nil
 }
@@ -54,7 +60,7 @@ func (cs *ConnectSession) Send(s, context string) error {
 		return err
 	}
 
-	if cs.Conn != nil {
+	if cs.IsConnected() {
 		err = cs.Conn.Write(output)
 		if err != nil {
 			return err
@@ -100,4 +106,8 @@ func (cs *ConnectSession) DeleteChannel(context string) {
 func (cs *ConnectSession) ChannelExist(context string) bool {
 	_, ok := cs.IrcChannels[context]
 	return ok
+}
+
+func (cs *ConnectSession) IsConnected() bool {
+	return cs.connected
 }

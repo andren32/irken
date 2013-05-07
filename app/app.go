@@ -105,26 +105,33 @@ func initHandlers(ia *IrkenApp) {
 			err = ia.gui.WriteToChannel(errMsg, "")
 			handleFatalErr(err)
 		}
+	}
 
-		ia.handlers["CJOIN"] = func(l *msg.Line) {
-			chanCont := l.Context()
-			ia.cs.NewChannel(chanCont)
-
-			ia.gui.CreateChannelWindow(chanCont, func() {
-				text, err := ia.gui.GetEntryText(chanCont)
-				if err != nil {
-					err := ia.gui.WriteToChannel("Couldn't get input", chanCont)
-					handleFatalErr(err)
-				}
-				err = ia.cs.Send(text, chanCont)
-				if err != nil {
-					err := ia.gui.WriteToChannel("Couldn't parse input", chanCont)
-					handleFatalErr(err)
-				}
-				ia.gui.EmptyEntryText(chanCont)
-			})
-			ia.BeginInput(chanCont)
+	ia.handlers["CJOIN"] = func(l *msg.Line) {
+		if !ia.cs.IsConnected() {
+			err := ia.gui.WriteToChannel("Error: Not connected to any server",
+				"")
+			handleFatalErr(err)
+			return
 		}
+
+		chanCont := l.Context()
+		ia.cs.NewChannel(chanCont)
+
+		ia.gui.CreateChannelWindow(chanCont, func() {
+			text, err := ia.gui.GetEntryText(chanCont)
+			if err != nil {
+				err := ia.gui.WriteToChannel("Couldn't get input", chanCont)
+				handleFatalErr(err)
+			}
+			err = ia.cs.Send(text, chanCont)
+			if err != nil {
+				err := ia.gui.WriteToChannel("Couldn't parse input", chanCont)
+				handleFatalErr(err)
+			}
+			ia.gui.EmptyEntryText(chanCont)
+		})
+		ia.BeginInput(chanCont)
 	}
 }
 
