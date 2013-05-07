@@ -100,7 +100,9 @@ func Parse(message string) (l *msg.Line, err error) {
 	case "333":
 		output, context, err = topicSetBy(l.Args())
 	case "353":
-		output, context = nicks(l.Args())
+		output, context = nickList(l.Args())
+	case "366":
+		output, context = nickListEnd(l.Args())
 	default:
 		// check for numeric commands
 		r := regexp.MustCompile("^\\d+$")
@@ -224,8 +226,14 @@ func numeric(nick string, params []string) (output, context string) {
 	return
 }
 
-func nicks(params []string) (output, context string) {
+func nickList(params []string) (output, context string) {
 	context = params[2]
+	output = params[len(params)-1]
+	return
+}
+
+func nickListEnd(params []string) (output, context string) {
+	context = params[1]
 	output = params[len(params)-1]
 	return
 }

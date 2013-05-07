@@ -154,7 +154,7 @@ func (gui *GUI) WriteToNicks(s, context string) error {
 		return errors.New("WriteToChannel: No Such Window!")
 	}
 	var endIter gtk.TextIter
-	textBuffer := page.textView.GetBuffer()
+	textBuffer := page.nickTV.GetBuffer()
 	textBuffer.GetEndIter(&endIter)
 	textBuffer.Insert(&endIter, s+"\n")
 	return nil

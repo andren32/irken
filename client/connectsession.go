@@ -72,7 +72,7 @@ func (cs *ConnectSession) Send(s, context string) error {
 
 func (cs *ConnectSession) readToChannels() {
 	go func() {
-		for {
+		for cs.connected {
 			s, err := cs.Conn.Read()
 			if err != nil {
 				// HANDLE ERROR...
@@ -89,7 +89,6 @@ func (cs *ConnectSession) readToChannels() {
 			} else {
 				value.Ch <- line
 			}
-
 		}
 	}()
 }
@@ -110,4 +109,9 @@ func (cs *ConnectSession) ChannelExist(context string) bool {
 
 func (cs *ConnectSession) IsConnected() bool {
 	return cs.connected
+}
+
+func (cs *ConnectSession) CloseConnection() {
+	cs.connected = false
+	cs.Conn.Close()
 }

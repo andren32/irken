@@ -11,6 +11,8 @@ import (
 	"os"
 	"os/user"
 	"strconv"
+	"strings"
+	"sort"
 )
 
 const DEFAULT_TITLE = "Irken"
@@ -157,8 +159,7 @@ func initHandlers(ia *IrkenApp) {
 
 	ia.handlers["CPART"] = func(l *msg.Line) {
 		if !ia.cs.IsConnected() {
-			err := ia.gui.WriteToChannel("Error: Not in any channel",
-				"")
+			err := ia.gui.WriteToChannel("Error: Not in any channel", "")
 			handleFatalErr(err)
 			return
 		}
@@ -166,6 +167,29 @@ func initHandlers(ia *IrkenApp) {
 		ia.cs.DeleteChannel(l.Context())
 		ia.EndInput(l.Context())
 		ia.gui.DeleteCurrentWindow()
+	}
+
+	ia.handlers["353"] = func(l *msg.Line) { // nick list
+		channel, ok := ia.cs.IrcChannels[l.Context()]
+		if !ok {
+			handleFatalErr(errors.New("353 Nicklist: Channel, " + l.Context() + ", doesn't exist. Raw: " + l.Raw()))
+			return
+		}
+		channel.Nicks += l.OutputMsg() + " "
+	}
+
+	ia.handlers["366"] = func(l *msg.Line) { // end of nick list
+		channel, ok := ia.cs.IrcChannels[l.Context()]
+		if !ok {
+			handleFatalErr(errors.New("366 Nicklist: Channel, " + l.Context() + ", doesn't exist. Raw: " + l.Raw()))
+			return
+		}
+		s := strings.TrimSpace(channel.Nicks)
+		nicks := strings.Split(s, " ")
+		sort.Strings(nicks)
+		for _, v := range nicks {
+			ia.gui.WriteToNicks(v, l.Context())
+		}
 	}
 
 	ia.handlers["CQUIT"] = func(l *msg.Line) {
