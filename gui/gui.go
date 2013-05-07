@@ -6,20 +6,25 @@ import (
 )
 
 type GUI struct {
-	width int
-	height int
-	window *gtk.Window
+	width    int
+	height   int
+	window   *gtk.Window
 	notebook *gtk.Notebook
-	pages map[string]*Page
+	pages    map[string]*Page
 }
 
 type Page struct {
-	textView *gtk.TextView 
-	nickTV *gtk.TextView
-	entry *gtk.Entry
+	textView *gtk.TextView
+	nickTV   *gtk.TextView
+	entry    *gtk.Entry
 }
 
 func NewGUI(title string, width, height int) *GUI {
+	glib.ThreadInit(nil)
+	gdk.ThreadsInit()
+	gdk.ThreadsEnter()
+	gtk.Init(nil)
+
 	window := gtk.NewWindow(gtk.WINDOW_TOPLEVEL)
 	window.SetPosition(gtk.WIN_POS_CENTER)
 	window.SetTitle(title)
@@ -33,7 +38,7 @@ func NewGUI(title string, width, height int) *GUI {
 
 	window.Add(notebook)
 	window.SetSizeRequest(width, height)
-	
+
 	return &GUI{window: window, notebook: notebook, pages: make(map[string]*Page),
 		width: width, height: height}
 }
@@ -43,7 +48,7 @@ func (gui *GUI) StartMain() {
 	gtk.Main()
 }
 
-func (gui *GUI) CreateChannelWindow (context string, buttonFunc func()) {
+func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
 	var page *gtk.Frame
 
 	if context == "" {
@@ -57,7 +62,7 @@ func (gui *GUI) CreateChannelWindow (context string, buttonFunc func()) {
 	vbox := gtk.NewVBox(false, 1)
 	hbox1 := gtk.NewHBox(false, 1)
 
-	var nickTV	*gtk.TextView
+	var nickTV *gtk.TextView
 	var textView *gtk.TextView
 
 	if context != "" {
@@ -117,4 +122,21 @@ func (gui *GUI) CreateChannelWindow (context string, buttonFunc func()) {
 
 func (gui *GUI) DeleteCurrentWindow() {
 	gui.notebook.RemovePage(nil, gui.notebook.GetCurrentPage())
+}
+
+func (gui *GUI) WriteToChannel(s, context string) {
+	var endIter gtk.TextIter
+	textBuffer := gui.pages[context].textView.GetBuffer()
+	textBuffer.GetEndIter(&endIter)
+	textBuffer.Insert(&endIter, s+"\n")
+
+	AutoScroll(textBuffer, &endIter)
+}
+
+func (gui *GUI) AutoScroll(textbuffer *gtk, TextBuffer, endIter *gtk.TextIter) {
+	// TODO
+}
+
+func (gui *GUI) CreateMenu() {
+
 }
