@@ -113,8 +113,8 @@ func (ia *IrkenApp) EndInput(context string) {
 
 func initHandlers(ia *IrkenApp) {
 	ia.handlers["CCONNECT"] = func(l *msg.Line) {
-		if ai.cs.IsConnected() {
-			err = ia.gui.WriteToChannel("Disconnect first to connect to a new server", "")
+		if ia.cs.IsConnected() {
+			err := ia.gui.WriteToChannel("Disconnect first to connect to a new server", "")
 			handleFatalErr(err)
 		}
 
@@ -153,6 +153,7 @@ func initHandlers(ia *IrkenApp) {
 			ia.gui.EmptyEntryText(chanCont)
 		})
 		ia.BeginInput(chanCont)
+		ia.gui.Notebook().NextPage()
 	}
 
 	ia.handlers["CPART"] = func(l *msg.Line) {

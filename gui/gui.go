@@ -191,6 +191,10 @@ func (gui *GUI) EmptyEntryText(context string) error {
 	return nil
 }
 
+func (gui *GUI) Notebook() *gtk.Notebook {
+	return gui.notebook
+}
+
 func CreateMenu(vbox *gtk.VBox) {
 	menubar := gtk.NewMenuBar()
 	vbox.PackStart(menubar, false, false, 0)
