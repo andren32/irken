@@ -15,6 +15,8 @@ import (
 const DEFAULT_TITLE = "Irken"
 const DEFAULT_CONT = ""
 
+// TODO: Close listeners after parted channels
+
 // generic handler func that takes a Line argument
 type Handler func(*msg.Line)
 
@@ -24,7 +26,8 @@ type IrkenApp struct {
 
 	conf *client.Config
 	// map from a command string to an action
-	handlers map[string]Handler
+	handlers  map[string]Handler
+	listeners map[string]chan struct{}
 }
 
 func NewIrkenApp(cfgPath string) *IrkenApp {
@@ -40,10 +43,11 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 	g := gui.NewGUI(DEFAULT_TITLE, wWidth, wHeight)
 	cs := client.NewConnectSession(nick, realname)
 	ia := &IrkenApp{
-		gui:      g,
-		cs:       cs,
-		conf:     conf,
-		handlers: make(map[string]Handler),
+		gui:       g,
+		cs:        cs,
+		conf:      conf,
+		handlers:  make(map[string]Handler),
+		listeners: make(map[string]chan struct{}),
 	}
 	initHandlers(ia)
 
@@ -78,21 +82,33 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 }
 
 func (ia *IrkenApp) BeginInput(context string) {
+	ch := make(chan struct{})
+	ia.listeners[context] = ch
 	go func() {
 		for {
-			line := <-ia.cs.IrcChannels[context].Ch
-			gdk.ThreadsEnter()
-			handlErr := ia.handle(line)
-			gdk.ThreadsLeave()
-			if handlErr != nil {
+			select {
+			case <-ch:
+				return
+			default:
+				line := <-ia.cs.IrcChannels[context].Ch
 				gdk.ThreadsEnter()
-				err := ia.gui.WriteToChannel(line.Output(), context)
+				handlErr := ia.handle(line)
 				gdk.ThreadsLeave()
-				handleFatalErr(err)
+				if handlErr != nil {
+					gdk.ThreadsEnter()
+					err := ia.gui.WriteToChannel(line.Output(), context)
+					gdk.ThreadsLeave()
+					handleFatalErr(err)
+				}
 			}
+
 		}
 	}()
 	return
+}
+
+func (ia *IrkenApp) EndInput(context string) {
+	close(ia.listeners[context])
 }
 
 func initHandlers(ia *IrkenApp) {
@@ -132,6 +148,19 @@ func initHandlers(ia *IrkenApp) {
 			ia.gui.EmptyEntryText(chanCont)
 		})
 		ia.BeginInput(chanCont)
+	}
+
+	ia.handlers["CPART"] = func(l *msg.Line) {
+		if !ia.cs.IsConnected() {
+			err := ia.gui.WriteToChannel("Error: Not in any channel",
+				"")
+			handleFatalErr(err)
+			return
+		}
+
+		ia.cs.DeleteChannel(l.Context())
+		ia.EndInput(l.Context())
+		ia.gui.DeleteCurrentWindow()
 	}
 }
 

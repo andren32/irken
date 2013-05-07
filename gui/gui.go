@@ -89,7 +89,7 @@ func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
 		swin2 := gtk.NewScrolledWindow(nil, nil)
 		swin2.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		swin2.SetShadowType(gtk.SHADOW_IN)
-		nickTV := gtk.NewTextView()
+		nickTV = gtk.NewTextView()
 		nickTV.SetEditable(false)
 		nickTV.SetCursorVisible(false)
 		nickTV.SetWrapMode(gtk.WRAP_WORD)
@@ -132,6 +132,7 @@ func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
 
 func (gui *GUI) DeleteCurrentWindow() {
 	gui.notebook.RemovePage(nil, gui.notebook.GetCurrentPage())
+	gui.window.ShowAll()
 }
 
 func (gui *GUI) WriteToChannel(s, context string) error {
