@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"errors"
 	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
@@ -35,17 +36,30 @@ func NewGUI(title string, width, height int) *GUI {
 		println("got destroy!", ctx.Data().(string))
 		gtk.MainQuit()
 	}, "foo")
+	/*
+		vbox := gtk.NewVBox(false, 0)
 
-	vbox := gtk.NewVBox(false, 0)
+			menuItem := gtk.NewMenuItem()
+			vbox.PackStart(menubar, false, false, 0)
 
+			cascademenu := gtk.NewMenuItemWithMnemonic("_File")
+			menubar.Append(cascademenu)
+			submenu := gtk.NewMenu()
+			cascademenu.SetSubmenu(submenu)
+
+			menuitem = gtk.NewMenuItemWithMnemonic("E_xit")
+			menuitem.Connect("activate", func() {
+				gtk.MainQuit()
+			})
+			submenu.Append(menuitem)*/
 	notebook := gtk.NewNotebook()
 
-	vbox.Add(notebook)
-	window.Add(vbox)
+	//vbox.Add(notebook)
+	window.Add(notebook)
 	window.SetSizeRequest(width, height)
 
 	return &GUI{window: window, notebook: notebook, pages: make(map[string]*Page),
-		width: width, height: height}
+		width: width, height: height /*menuItem: menuItem*/}
 }
 
 func (gui *GUI) StartMain() {
@@ -74,7 +88,7 @@ func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
 		swin := gtk.NewScrolledWindow(nil, nil)
 		swin.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		swin.SetShadowType(gtk.SHADOW_IN)
-		textView := gtk.NewTextView()
+		textView = gtk.NewTextView()
 		textView.SetEditable(false)
 		textView.SetCursorVisible(false)
 		textView.SetWrapMode(gtk.WRAP_WORD)
@@ -96,7 +110,7 @@ func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
 		swin := gtk.NewScrolledWindow(nil, nil)
 		swin.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		swin.SetShadowType(gtk.SHADOW_IN)
-		textView := gtk.NewTextView()
+		textView = gtk.NewTextView()
 		textView.SetEditable(false)
 		textView.SetCursorVisible(false)
 		textView.SetWrapMode(gtk.WRAP_WORD)
@@ -129,27 +143,79 @@ func (gui *GUI) DeleteCurrentWindow() {
 	gui.notebook.RemovePage(nil, gui.notebook.GetCurrentPage())
 }
 
-func (gui *GUI) WriteToChannel(s, context string) {
-	var endIter gtk.TextIter
-	textBuffer := gui.pages[context].textView.GetBuffer()
-	textBuffer.GetEndIter(&endIter)
-	textBuffer.Insert(&endIter, s+"\n")
+func (gui *GUI) WriteToChannel(s, context string) error {
+	ch := make(chan error)
+	go func() {
+		var endIter gtk.TextIter
+		page, ok := gui.pages[context]
+		if !ok {
+			ch <- errors.New("WriteToChannel: No Such Window!")
+			return
+		}
+		ch <- nil
+		gdk.ThreadsEnter()
+		textBuffer := page.textView.GetBuffer()
+		textBuffer.GetEndIter(&endIter)
+		textBuffer.Insert(&endIter, s+"\n")
 
-	gui.AutoScroll(textBuffer, &endIter)
+		gui.AutoScroll(textBuffer, &endIter)
+		gdk.ThreadsLeave()
+	}()
+	return <-ch
+}
+func (gui *GUI) WriteToNicks(s, context string) error {
+	ch := make(chan error)
+	go func() {
+		page, ok := gui.pages[context]
+		if !ok {
+			ch <- errors.New("WriteToChannel: No Such Window!")
+			return
+		}
+		ch <- nil
+		gdk.ThreadsEnter()
+		var endIter gtk.TextIter
+		textBuffer := page.textView.GetBuffer()
+		textBuffer.GetEndIter(&endIter)
+		textBuffer.Insert(&endIter, s+"\n")
+		gdk.ThreadsLeave()
+	}()
+
+	return <-ch
 }
 
-func (gui *GUI) WriteToNicks(s, context string) {
-	var endIter gtk.TextIter
-	textBuffer := gui.pages[context].nickTV.GetBuffer()
-	textBuffer.GetEndIter(&endIter)
-	textBuffer.Insert(&endIter, s+"\n")
-}
-
-func (gui *GUI) EmptyNicks(s, context string) {
-	textBuffer := gui.pages[context].nickTV.GetBuffer()
-	textBuffer.SetText("")
+func (gui *GUI) EmptyNicks(s, context string) error {
+	ch := make(chan error)
+	go func() {
+		page, ok := gui.pages[context]
+		if !ok {
+			ch <- errors.New("WriteToChannel: No Such Window!")
+			return
+		}
+		ch <- nil
+		gdk.ThreadsEnter()
+		textBuffer := page.nickTV.GetBuffer()
+		textBuffer.SetText("")
+		gdk.ThreadsLeave()
+	}()
+	return <-ch
 }
 
 func (gui *GUI) AutoScroll(textbuffer *gtk.TextBuffer, endIter *gtk.TextIter) {
 	// TODO
+}
+
+func (gui *GUI) GetEntryBuffer(context string) (string, error) {
+	page, ok := pages[context]
+	if !ok {
+		return "", errors.New("GetEntryBuffer: No such window!")
+	}
+	return page.entry.GetBuffer(), nil
+}
+
+func (gui *GUI) EmptyEntryBuffer(context) {
+	page, ok := pages[context]
+	if !ok {
+		return "", errors.New("GetEntryBuffer: No such window!")
+	}
+	page.entry.SetBuffer("")
 }
