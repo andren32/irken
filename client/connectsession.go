@@ -44,6 +44,7 @@ func (cs *ConnectSession) Connect(addr string) error {
 	}
 
 	cs.Conn = Conn
+	cs.readToChannels()
 	return nil
 }
 
@@ -63,7 +64,7 @@ func (cs *ConnectSession) Send(s, context string) error {
 	return nil
 }
 
-func (cs *ConnectSession) ReadToChannels() {
+func (cs *ConnectSession) readToChannels() {
 	go func() {
 		for {
 			s, err := cs.Conn.Read()
