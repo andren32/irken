@@ -92,6 +92,8 @@ func Parse(message, nick, context string) (l *msg.Line,
 		pr = connect(nick, l.Args())
 	case "CDISCONNECT":
 		out, pr = disconnect(nick, l.Args())
+	case "CPING":
+		out, pr = ping(nick, l.Args())
 	case "CHELP":
 		// only arguments are important
 		out, pr = "", ""
@@ -150,6 +152,12 @@ func quit(nick string, params []string) (out, pr string) {
 
 func me(nick, context string, params []string) (out, pr string) {
 	// TODO
+	return
+}
+
+func ping(nick string, params []string) (out, pr string) {
+	out = "PING :" + params[0]
+	pr = nick + " pinged " + params[0]
 	return
 }
 

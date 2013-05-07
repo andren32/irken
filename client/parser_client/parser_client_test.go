@@ -227,6 +227,23 @@ func TestServer(t *testing.T) {
 	test.Check(t, cont, expCont)
 }
 
+func TestPing(t *testing.T) {
+	input := "/ping target"
+	nick := "user"
+	context := ""
+	l, o, err := Parse(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.OutputMsg()
+
+	expPr := "user pinged target"
+	expOut := "PING :target"
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+
+}
+
 func TestHelp(t *testing.T) {
 	input := "/help arg"
 	nick := "user"

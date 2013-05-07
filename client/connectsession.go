@@ -6,19 +6,25 @@
 package client
 
 import (
+	"fmt"
 	"irken/client/msg"
 	"irken/client/parser_client"
 	"irken/client/parser_server"
 	"irken/irc"
+	"time"
 )
 
 type ConnectSession struct {
 	// user specific
 	nick     string
 	realName string
+	addr     string
 	// etc
 	Conn        *irc.Conn
 	IrcChannels map[string]*IRCChannel
+
+	pingFreq    time.Duration
+	pingResetCh chan struct{}
 	connected   bool
 }
 
@@ -27,6 +33,7 @@ func NewConnectSession(nick string, realName string) *ConnectSession {
 		nick:        nick,
 		realName:    realName,
 		IrcChannels: make(map[string]*IRCChannel),
+		pingFreq:    time.Minute,
 		connected:   false,
 	}
 	cs.NewChannel("")
@@ -50,12 +57,40 @@ func (cs *ConnectSession) Connect(addr string) error {
 
 	cs.Conn = Conn
 	cs.connected = true
+	cs.addr = addr
 	cs.readToChannels()
+	cs.sendPings()
 	return nil
+}
+
+func (cs *ConnectSession) sendPings() {
+	cs.pingResetCh = make(chan struct{})
+	go func() {
+		for {
+			select {
+			case _, ok := <-cs.pingResetCh:
+				if !ok {
+					return
+				}
+			case <-time.After(cs.pingFreq):
+				cs.Send("/ping "+cs.addr, "")
+			}
+		}
+	}()
+}
+
+func (cs *ConnectSession) ResetPing() {
+	var dummy struct{}
+	cs.pingResetCh <- dummy
+}
+
+func (cs *ConnectSession) stopPings() {
+	close(cs.pingResetCh)
 }
 
 func (cs *ConnectSession) Send(s, context string) error {
 	line, output, err := parser_client.Parse(s, cs.nick, context)
+	fmt.Println(line.Output())
 	if err != nil {
 		return err
 	}
@@ -113,5 +148,6 @@ func (cs *ConnectSession) IsConnected() bool {
 
 func (cs *ConnectSession) CloseConnection() {
 	cs.connected = false
+	cs.stopPings()
 	cs.Conn.Close()
 }
