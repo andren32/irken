@@ -169,6 +169,11 @@ func initHandlers(ia *IrkenApp) {
 		ia.gui.DeleteCurrentWindow()
 	}
 
+	ia.handlers["CQUIT"] = func(l *msg.Line) {
+		// TODO: Clean up, at least check that the server has disconnected
+		os.Exit(0)
+	}
+
 	ia.handlers["353"] = func(l *msg.Line) { // nick list
 		channel, ok := ia.cs.IrcChannels[l.Context()]
 		if !ok {
@@ -184,17 +189,28 @@ func initHandlers(ia *IrkenApp) {
 			handleFatalErr(errors.New("366 Nicklist: Channel, " + l.Context() + ", doesn't exist. Raw: " + l.Raw()))
 			return
 		}
-		s := strings.TrimSpace(channel.Nicks)
-		nicks := strings.Split(s, " ")
-		sort.Strings(nicks)
-		for _, v := range nicks {
-			ia.gui.WriteToNicks(v, l.Context())
-		}
+		ia.updateNicks(channel.Nicks, l.Context())
 	}
 
-	ia.handlers["CQUIT"] = func(l *msg.Line) {
-		// TODO: Clean up, at least check that the server has disconnected
-		os.Exit(0)
+	ia.handlers["JOIN"] = func(l *msg.Line) { // end of nick list
+		channel, ok := ia.cs.IrcChannels[l.Context()]
+		if !ok {
+			handleFatalErr(errors.New("366 Nicklist: Channel, " + l.Context() + ", doesn't exist. Raw: " + l.Raw()))
+			return
+		}
+		channel.Nicks += l.Nick() + " "
+		ia.updateNicks(channel.Nicks, l.Context())
+		ia.gui.WriteToChannel(l.Output(), l.Context())
+	}
+}
+
+func (ia *IrkenApp) updateNicks(s, context string) {
+	s = strings.TrimSpace(s)
+	nicks := strings.Split(s, " ")
+	sort.Strings(nicks)
+	ia.gui.EmptyNicks(context)
+	for _, v := range nicks {
+		ia.gui.WriteToNicks(v, context)
 	}
 }
 
