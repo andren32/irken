@@ -12,4 +12,6 @@ func init() {
 func main() {
 	a := app.NewIrkenApp("../config.cfg")
 	a.GUI().StartMain()
+
+	select {}
 }

@@ -81,14 +81,15 @@ func (ia *IrkenApp) BeginInput(context string) {
 	go func() {
 		for {
 			line := <-ia.cs.IrcChannels[context].Ch
-			fmt.Println(line.Output())
 			gdk.ThreadsEnter()
-			err := ia.handle(line)
-			if err != nil {
+			handlErr := ia.handle(line)
+			gdk.ThreadsLeave()
+			if handlErr != nil {
+				gdk.ThreadsEnter()
 				err := ia.gui.WriteToChannel(line.Output(), context)
+				gdk.ThreadsLeave()
 				handleFatalErr(err)
 			}
-			gdk.ThreadsLeave()
 		}
 	}()
 	return
@@ -106,6 +107,26 @@ func initHandlers(ia *IrkenApp) {
 		} else {
 			ia.cs.ReadToChannels()
 		}
+	}
+
+	ia.handlers["CJOIN"] = func(l *msg.Line) {
+		chanCont := l.Context()
+		ia.cs.NewChannel(chanCont)
+
+		ia.gui.CreateChannelWindow(chanCont, func() {
+			text, err := ia.gui.GetEntryText(chanCont)
+			if err != nil {
+				err := ia.gui.WriteToChannel("Couldn't get input", chanCont)
+				handleFatalErr(err)
+			}
+			err = ia.cs.Send(text, chanCont)
+			if err != nil {
+				err := ia.gui.WriteToChannel("Couldn't parse input", chanCont)
+				handleFatalErr(err)
+			}
+			ia.gui.EmptyEntryText(chanCont)
+		})
+		ia.BeginInput(chanCont)
 	}
 }
 
@@ -125,7 +146,7 @@ func (ia *IrkenApp) AddHandler(h Handler, cmd string) (err error) {
 func (ia *IrkenApp) handle(l *msg.Line) (err error) {
 	h, ok := ia.handlers[l.Cmd()]
 	if !ok {
-		return err
+		return errors.New("Couldn't find a handler")
 	}
 	h(l)
 	return
