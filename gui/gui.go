@@ -160,7 +160,7 @@ func (gui *GUI) WriteToNicks(s, context string) error {
 	return nil
 }
 
-func (gui *GUI) EmptyNicks(s, context string) error {
+func (gui *GUI) EmptyNicks(context string) error {
 	page, ok := gui.pages[context]
 	if !ok {
 		return errors.New("WriteToChannel: No Such Window!")
