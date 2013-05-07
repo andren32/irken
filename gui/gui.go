@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"fmt"
 	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
@@ -74,7 +75,7 @@ func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
 		swin := gtk.NewScrolledWindow(nil, nil)
 		swin.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		swin.SetShadowType(gtk.SHADOW_IN)
-		textView := gtk.NewTextView()
+		textView = gtk.NewTextView()
 		textView.SetEditable(false)
 		textView.SetCursorVisible(false)
 		textView.SetWrapMode(gtk.WRAP_WORD)
@@ -96,7 +97,7 @@ func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
 		swin := gtk.NewScrolledWindow(nil, nil)
 		swin.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		swin.SetShadowType(gtk.SHADOW_IN)
-		textView := gtk.NewTextView()
+		textView = gtk.NewTextView()
 		textView.SetEditable(false)
 		textView.SetCursorVisible(false)
 		textView.SetWrapMode(gtk.WRAP_WORD)
@@ -129,13 +130,18 @@ func (gui *GUI) DeleteCurrentWindow() {
 	gui.notebook.RemovePage(nil, gui.notebook.GetCurrentPage())
 }
 
-func (gui *GUI) WriteToChannel(s, context string) {
+func (gui *GUI) WriteToChannel(s, context string) (err error) {
 	var endIter gtk.TextIter
-	textBuffer := gui.pages[context].textView.GetBuffer()
+	tmp, ok := gui.pages[context]
+	if !ok {
+		return fmt.Errorf("No such window %s", context)
+	}
+	textBuffer := tmp.textView.GetBuffer()
 	textBuffer.GetEndIter(&endIter)
 	textBuffer.Insert(&endIter, s+"\n")
 
 	gui.AutoScroll(textBuffer, &endIter)
+	return nil
 }
 
 func (gui *GUI) WriteToNicks(s, context string) {
