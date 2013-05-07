@@ -127,6 +127,7 @@ func (gui *GUI) CreateChannelWindow(context string, buttonFunc func()) {
 
 	newPage := &Page{textView: textView, nickTV: nickTV, entry: entry}
 	gui.pages[context] = newPage
+	gui.window.ShowAll()
 }
 
 func (gui *GUI) DeleteCurrentWindow() {
@@ -134,7 +135,6 @@ func (gui *GUI) DeleteCurrentWindow() {
 }
 
 func (gui *GUI) WriteToChannel(s, context string) error {
-	gdk.ThreadsEnter()
 	var endIter gtk.TextIter
 	page, ok := gui.pages[context]
 	if !ok {
@@ -145,11 +145,9 @@ func (gui *GUI) WriteToChannel(s, context string) error {
 	textBuffer.Insert(&endIter, s+"\n")
 
 	gui.AutoScroll(textBuffer, &endIter)
-	gdk.ThreadsLeave()
 	return nil
 }
 func (gui *GUI) WriteToNicks(s, context string) error {
-	gdk.ThreadsEnter()
 	page, ok := gui.pages[context]
 	if !ok {
 		return errors.New("WriteToChannel: No Such Window!")
@@ -158,19 +156,16 @@ func (gui *GUI) WriteToNicks(s, context string) error {
 	textBuffer := page.textView.GetBuffer()
 	textBuffer.GetEndIter(&endIter)
 	textBuffer.Insert(&endIter, s+"\n")
-	gdk.ThreadsLeave()
 	return nil
 }
 
 func (gui *GUI) EmptyNicks(s, context string) error {
-	gdk.ThreadsEnter()
 	page, ok := gui.pages[context]
 	if !ok {
 		return errors.New("WriteToChannel: No Such Window!")
 	}
 	textBuffer := page.nickTV.GetBuffer()
 	textBuffer.SetText("")
-	gdk.ThreadsLeave()
 	return nil
 }
 

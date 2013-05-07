@@ -18,14 +18,11 @@ func init() {
 
 func main() {
 	g := gui.NewGUI("Irken", 860, 640)
+
 	g.CreateChannelWindow("", func() {
-		text, _ := g.GetEntryText("")
-		go func() {
-			gdk.ThreadsEnter()
-			g.WriteToChannel(text, "")
-			gdk.ThreadsLeave()
-		}()
+		g.CreateChannelWindow("fafa", func() {})
 	})
 
+	g.CreateChannelWindow("hhhh", func() {})
 	g.StartMain()
 }
