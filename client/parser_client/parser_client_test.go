@@ -190,6 +190,23 @@ func TestClientMsg(t *testing.T) {
 	test.Check(t, cont, expCont)
 }
 
+func TestDisconnect(t *testing.T) {
+	input := "/disconnect Bye bye"
+	nick := "user"
+	context := "#chan"
+
+	l, o, err := Parse(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.OutputMsg()
+
+	expPr := "user disconnected"
+	expOut := "QUIT :Bye bye"
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+}
+
 func TestServer(t *testing.T) {
 	input := "/connect irc.freenode.net"
 	nick := "user"
@@ -208,4 +225,21 @@ func TestServer(t *testing.T) {
 	test.Check(t, o, expOut)
 	test.Check(t, pr, expPr)
 	test.Check(t, cont, expCont)
+}
+
+func TestHelp(t *testing.T) {
+	input := "/help arg"
+	nick := "user"
+	context := ""
+	l, o, err := Parse(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.OutputMsg()
+
+	expPr := ""
+	expOut := ""
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+
 }
