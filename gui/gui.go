@@ -12,6 +12,7 @@ type GUI struct {
 	window   *gtk.Window
 	notebook *gtk.Notebook
 	pages    map[string]*Page
+	menuItem *gtk.MenuItem
 }
 
 type Page struct {
@@ -35,9 +36,12 @@ func NewGUI(title string, width, height int) *GUI {
 		gtk.MainQuit()
 	}, "foo")
 
+	vbox := gtk.NewVBox(false, 0)
+
 	notebook := gtk.NewNotebook()
 
-	window.Add(notebook)
+	vbox.Add(notebook)
+	window.Add(vbox)
 	window.SetSizeRequest(width, height)
 
 	return &GUI{window: window, notebook: notebook, pages: make(map[string]*Page),
@@ -134,10 +138,18 @@ func (gui *GUI) WriteToChannel(s, context string) {
 	gui.AutoScroll(textBuffer, &endIter)
 }
 
-func (gui *GUI) AutoScroll(textbuffer *gtk.TextBuffer, endIter *gtk.TextIter) {
-	// TODO
+func (gui *GUI) WriteToNicks(s, context string) {
+	var endIter gtk.TextIter
+	textBuffer := gui.pages[context].nickTV.GetBuffer()
+	textBuffer.GetEndIter(&endIter)
+	textBuffer.Insert(&endIter, s+"\n")
 }
 
-func (gui *GUI) CreateMenu() {
+func (gui *GUI) EmptyNicks(s, context string) {
+	textBuffer := gui.pages[context].nickTV.GetBuffer()
+	textBuffer.SetText("")
+}
 
+func (gui *GUI) AutoScroll(textbuffer *gtk.TextBuffer, endIter *gtk.TextIter) {
+	// TODO
 }
