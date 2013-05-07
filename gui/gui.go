@@ -36,30 +36,19 @@ func NewGUI(title string, width, height int) *GUI {
 		println("got destroy!", ctx.Data().(string))
 		gtk.MainQuit()
 	}, "foo")
-	/*
-		vbox := gtk.NewVBox(false, 0)
 
-			menuItem := gtk.NewMenuItem()
-			vbox.PackStart(menubar, false, false, 0)
+	vbox := gtk.NewVBox(false, 0)
 
-			cascademenu := gtk.NewMenuItemWithMnemonic("_File")
-			menubar.Append(cascademenu)
-			submenu := gtk.NewMenu()
-			cascademenu.SetSubmenu(submenu)
+	//CreateMenu(vbox)
 
-			menuitem = gtk.NewMenuItemWithMnemonic("E_xit")
-			menuitem.Connect("activate", func() {
-				gtk.MainQuit()
-			})
-			submenu.Append(menuitem)*/
 	notebook := gtk.NewNotebook()
 
-	//vbox.Add(notebook)
-	window.Add(notebook)
+	vbox.Add(notebook)
+	window.Add(vbox)
 	window.SetSizeRequest(width, height)
 
 	return &GUI{window: window, notebook: notebook, pages: make(map[string]*Page),
-		width: width, height: height /*menuItem: menuItem*/}
+		width: width, height: height}
 }
 
 func (gui *GUI) StartMain() {
@@ -144,24 +133,17 @@ func (gui *GUI) DeleteCurrentWindow() {
 }
 
 func (gui *GUI) WriteToChannel(s, context string) error {
-	ch := make(chan error)
-	go func() {
-		var endIter gtk.TextIter
-		page, ok := gui.pages[context]
-		if !ok {
-			ch <- errors.New("WriteToChannel: No Such Window!")
-			return
-		}
-		ch <- nil
-		gdk.ThreadsEnter()
-		textBuffer := page.textView.GetBuffer()
-		textBuffer.GetEndIter(&endIter)
-		textBuffer.Insert(&endIter, s+"\n")
+	var endIter gtk.TextIter
+	page, ok := gui.pages[context]
+	if !ok {
+		return errors.New("WriteToChannel: No Such Window!")
+	}
+	textBuffer := page.textView.GetBuffer()
+	textBuffer.GetEndIter(&endIter)
+	textBuffer.Insert(&endIter, s+"\n")
 
-		gui.AutoScroll(textBuffer, &endIter)
-		gdk.ThreadsLeave()
-	}()
-	return <-ch
+	gui.AutoScroll(textBuffer, &endIter)
+	return nil
 }
 func (gui *GUI) WriteToNicks(s, context string) error {
 	ch := make(chan error)
@@ -204,7 +186,7 @@ func (gui *GUI) AutoScroll(textbuffer *gtk.TextBuffer, endIter *gtk.TextIter) {
 	// TODO
 }
 
-func (gui *GUI) GetEntryBuffer(context string) (string, error) {
+func (gui *GUI) GetEntryText(context string) (string, error) {
 	page, ok := gui.pages[context]
 	if !ok {
 		return "", errors.New("GetEntryBuffer: No such window!")
@@ -212,11 +194,41 @@ func (gui *GUI) GetEntryBuffer(context string) (string, error) {
 	return page.entry.GetText(), nil
 }
 
-func (gui *GUI) EmptyEntryBuffer(context string) error {
+func (gui *GUI) EmptyEntryText(context string) error {
 	page, ok := gui.pages[context]
 	if !ok {
 		return errors.New("EmptyEntryBuffer: No such window!")
 	}
 	page.entry.SetText("")
 	return nil
+}
+
+func CreateMenu(vbox *gtk.VBox) {
+	menubar := gtk.NewMenuBar()
+	vbox.PackStart(menubar, false, false, 0)
+
+	menuitem := gtk.NewMenuItem()
+	vbox.PackStart(menubar, false, false, 0)
+
+	cascademenu := gtk.NewMenuItemWithMnemonic("_File")
+	menubar.Append(cascademenu)
+	submenu := gtk.NewMenu()
+	cascademenu.SetSubmenu(submenu)
+
+	menuitem = gtk.NewMenuItemWithMnemonic("E_xit")
+	menuitem.Connect("activate", func() {
+		gtk.MainQuit()
+	})
+	submenu.Append(menuitem)
+
+	cascademenu = gtk.NewMenuItemWithMnemonic("_Tools")
+	menubar.Append(cascademenu)
+	submenu = gtk.NewMenu()
+	cascademenu.SetSubmenu(submenu)
+
+	settings := gtk.NewMenuItemWithMnemonic("_Settings")
+	settings.Connect("activate", func() {
+
+	})
+	submenu.Append(settings)
 }
