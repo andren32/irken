@@ -8,14 +8,13 @@ import (
 	"irken/client/msg"
 	"irken/gui"
 	"log"
+	"os"
 	"os/user"
 	"strconv"
 )
 
 const DEFAULT_TITLE = "Irken"
 const DEFAULT_CONT = ""
-
-// TODO: Close listeners after parted channels
 
 // generic handler func that takes a Line argument
 type Handler func(*msg.Line)
@@ -167,6 +166,11 @@ func initHandlers(ia *IrkenApp) {
 		ia.cs.DeleteChannel(l.Context())
 		ia.EndInput(l.Context())
 		ia.gui.DeleteCurrentWindow()
+	}
+
+	ia.handlers["CQUIT"] = func(l *msg.Line) {
+		// TODO: Clean up, at least check that the server has disconnected
+		os.Exit(0)
 	}
 }
 
