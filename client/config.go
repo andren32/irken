@@ -46,6 +46,16 @@ func (c *Config) GetCfgValues() map[string]string {
 	return c.cfgValues
 }
 
+func (c *Config) GetCfgValue(key string) (value string, ok bool) {
+	value, ok = c.cfgValues[key]
+	return
+}
+
+func (c *Config) HasValue(key string) bool {
+	_, ok := c.cfgValues[key]
+	return ok
+}
+
 // Loads the values from the config file
 func (c *Config) Load() error {
 	file, err := os.Open(c.fileName)

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"runtime"
+	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
-	"github.com/mattn/go-gtk/gdk"
 	"irken/gui"
+	"runtime"
 )
 
 func main() {
