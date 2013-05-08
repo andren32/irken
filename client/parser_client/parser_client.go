@@ -104,7 +104,12 @@ func Parse(message, nick, context string) (l *msg.Line,
 		// only arguments are important
 		out, pr = "", ""
 	default:
-		err = errors.New("Unknown command")
+		// TODO: Remove all error handling, should
+		// instead just parse an error msg
+		// to the current window
+		out = ""
+		pr = "/" + strings.ToLower(l.Cmd()[1:]) + ": Unknown command"
+
 	}
 
 	if err != nil {

@@ -323,3 +323,19 @@ func TestHelp(t *testing.T) {
 	test.Check(t, pr, expPr)
 
 }
+
+func TestInvalidCommand(t *testing.T) {
+	input := "/someweirdshit blabla"
+	nick := "user"
+	context := ""
+	l, o, err := Parse(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.OutputMsg()
+
+	expPr := "/someweirdshit: Unknown command"
+	expOut := ""
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+}
