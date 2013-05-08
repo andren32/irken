@@ -5,6 +5,7 @@ import (
 	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
+	"regexp"
 	"unsafe"
 )
 
@@ -61,6 +62,8 @@ func (gui *GUI) StartMain() {
 func (gui *GUI) CreateChannelWindow(context string, sendFunc func()) {
 	var page *gtk.Frame
 
+	conversationRegex := "^\\w"
+	regex := regexp.MustCompile(conversationRegex)
 	if context == "" {
 		page = gtk.NewFrame("Server")
 		gui.notebook.AppendPage(page, gtk.NewLabel("Server"))
@@ -75,7 +78,7 @@ func (gui *GUI) CreateChannelWindow(context string, sendFunc func()) {
 	var nickTV *gtk.TextView
 	var textView *gtk.TextView
 
-	if context != "" {
+	if context != "" && !regex.MatchString(context) {
 		swin := gtk.NewScrolledWindow(nil, nil)
 		swin.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		swin.SetShadowType(gtk.SHADOW_IN)

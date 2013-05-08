@@ -150,6 +150,24 @@ func TestClientPart(t *testing.T) {
 	test.Check(t, o, expOut)
 	test.Check(t, pr, expPr)
 	test.Check(t, cont, expCont)
+
+	input = "/part"
+	nick = "user"
+	context = "otheruser"
+	l, o, err = Parse(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr = l.OutputMsg()
+	cont = l.Context()
+
+	expOut = ""
+	expCont = "otheruser"
+	expPr = "user has left the conversation with otheruser"
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+	test.Check(t, cont, expCont)
+
 }
 
 func TestClientQuit(t *testing.T) {
