@@ -226,6 +226,20 @@ func TestNicks(t *testing.T) {
 	test.Check(t, msg, expMsg)
 }
 
+func TestPing(t *testing.T) {
+	input := "PING :arg"
+	l, err := Parse(input)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	msg := l.OutputMsg()
+	cont := l.Context()
+	expCont := ""
+	expMsg := "Pinged: arg"
+	test.Check(t, cont, expCont)
+	test.Check(t, msg, expMsg)
+}
+
 func TestNumeric(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com 008 user :Something in the beginning"
 	l, err := Parse(input)

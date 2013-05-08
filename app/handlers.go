@@ -113,4 +113,14 @@ func initHandlers(ia *IrkenApp) {
 		ia.updateNicks(channel.Nicks, l.Context())
 		ia.gui.WriteToChannel(l.Output(), l.Context())
 	}
+
+	ia.handlers["PING"] = func(l *msg.Line) {
+		// TODO: Handle different for server and IRC users
+		if len(l.Args()) > 0 {
+			ia.cs.Send("/silentpong "+l.Args()[len(l.Args())-1], "")
+		} else {
+			ia.cs.Send("/silentpong", "")
+		}
+		ia.cs.ResetPing()
+	}
 }
