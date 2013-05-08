@@ -65,6 +65,13 @@ func initHandlers(ia *IrkenApp) {
 			return
 		}
 
+		if l.Context() == "" {
+			err := ia.gui.WriteToChannel("/part: You can't \"part\" from the server",
+				l.Context())
+			handleFatalErr(err)
+			return
+		}
+
 		ia.DeleteChatWindow(l.Context())
 	}
 
@@ -155,6 +162,12 @@ func initHandlers(ia *IrkenApp) {
 		handleFatalErr(err)
 
 		err = ia.gui.WriteToChannel(l.Output(), l.Context())
+		handleFatalErr(err)
+	}
+
+	ia.handlers["401"] = func(l *msg.Line) {
+		ia.DeleteChatWindow(l.Context())
+		err := ia.gui.WriteToChannel(l.OutputMsg(), "")
 		handleFatalErr(err)
 	}
 }

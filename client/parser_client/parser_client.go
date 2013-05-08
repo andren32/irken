@@ -151,14 +151,23 @@ func part(nick, context string) (out, pr string) {
 		pr = nick + " has left the conversation with " + context
 		return
 	}
+	if context == "" {
+		out = ""
+		pr = "You can't part from server!"
+		return
+	}
 	out = "PART " + context
 	pr = nick + " has left " + context
 	return
 }
 
 func quit(nick string, params []string) (out, pr string) {
-	msg := concatArgs(params)
-	out = "QUIT :" + msg
+	out = "QUIT"
+	var msg string
+	if len(params) > 0 {
+		msg = concatArgs(params)
+		out += " :" + msg
+	}
 	pr = nick + " has quit (" + msg + ")"
 	return
 }
