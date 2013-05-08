@@ -78,6 +78,8 @@ func Parse(message, nick, context string) (l *msg.Line,
 		out, pr = me(nick, context, l.Args())
 	case "CJOIN":
 		out, pr, cont = join(nick, l.Args())
+	case "CNICK":
+		out, pr = nickChange(nick, l.Args())
 	case "CLEAVE":
 		out, pr = part(nick, context)
 		l.SetCmd("CPART")
@@ -152,6 +154,12 @@ func quit(nick string, params []string) (out, pr string) {
 
 func me(nick, context string, params []string) (out, pr string) {
 	// TODO
+	return
+}
+
+func nickChange(nick string, params []string) (out, pr string) {
+	out = "NICK " + params[0]
+	pr = nick + " changed nick to " + params[0]
 	return
 }
 
