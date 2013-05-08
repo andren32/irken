@@ -1,7 +1,10 @@
 package client
 
-import "irken/client/msg"
-import "strings"
+import (
+	"irken/client/msg"
+	"strings"
+	"regexp"
+	)
 
 // IRCChannel is a channel on the irc
 type IRCChannel struct {
@@ -13,8 +16,9 @@ type IRCChannel struct {
 func (ircch *IRCChannel) AddNicks(nicks string) {
 	nicks = strings.TrimSpace(nicks)
 	nickArray := strings.Split(nicks, " ")
+	regex := regexp.MustCompile("^(@|%|\\+)")
 	for _, v := range nickArray {
-		if string(v[0]) == "@" || string(v[0]) == "%" || string(v[0]) == "+" { // REGEXP? Other solution?
+		if regex.MatchString(v) {
 			ircch.Nicks[string(v[1:])] = string(v[0])
 		} else {
 			ircch.Nicks[v] = ""

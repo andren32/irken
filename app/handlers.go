@@ -97,7 +97,7 @@ func initHandlers(ia *IrkenApp) {
 			handleFatalErr(errors.New("366 Nicklist: Channel, " + l.Context() + ", doesn't exist. Raw: " + l.Raw()))
 			return
 		}
-		channel.AddNicks(l.Nick())
+		channel.AddNick(l.Nick(), "")
 		ia.updateNicks(channel.Nicks, l.Context())
 		ia.gui.WriteToChannel(l.Output(), l.Context())
 	}
