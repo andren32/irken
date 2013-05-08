@@ -6,7 +6,6 @@
 package client
 
 import (
-	"fmt"
 	"irken/client/msg"
 	"irken/client/parser_client"
 	"irken/client/parser_server"
@@ -94,13 +93,15 @@ func (cs *ConnectSession) Send(s, context string) error {
 		return err
 	}
 
-	if cs.IsConnected() {
+	if cs.IsConnected() && output != "" {
 		err = cs.Conn.Write(output)
 		if err != nil {
 			return err
 		}
 	}
-	cs.IrcChannels[context].Ch <- line
+	if line.OutputMsg() != "" {
+		cs.IrcChannels[context].Ch <- line
+	}
 	return nil
 }
 
