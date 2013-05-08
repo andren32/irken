@@ -98,6 +98,8 @@ func Parse(message, nick, context string) (l *msg.Line,
 		out, pr = ping(nick, l.Args())
 	case "CSILENTPING":
 		out, pr = silentping(l.Args())
+	case "CSILENTPONG":
+		out, pr = silentpong(l.Args())
 	case "CHELP":
 		// only arguments are important
 		out, pr = "", ""
@@ -180,6 +182,15 @@ func ping(nick string, params []string) (out, pr string) {
 
 func silentping(params []string) (out, pr string) {
 	out = "PING " + params[0]
+	pr = ""
+	return
+}
+
+func silentpong(params []string) (out, pr string) {
+	out = "PONG"
+	if len(params) > 0 {
+		out += " :" + params[len(params)-1]
+	}
 	pr = ""
 	return
 }
