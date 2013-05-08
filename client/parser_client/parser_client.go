@@ -94,6 +94,8 @@ func Parse(message, nick, context string) (l *msg.Line,
 		out, pr = disconnect(nick, l.Args())
 	case "CPING":
 		out, pr = ping(nick, l.Args())
+	case "CSILENTPING":
+		out, pr = silentping(l.Args())
 	case "CHELP":
 		// only arguments are important
 		out, pr = "", ""
@@ -156,14 +158,21 @@ func me(nick, context string, params []string) (out, pr string) {
 }
 
 func ping(nick string, params []string) (out, pr string) {
-	var target string
 	if len(params) == 0 {
-		target = ""
-	} else {
-		target = params[0]
+		out = ""
+		pr = "/ping: You must supply a ping target!"
+		return
 	}
-	out = "PING :" + target
+
+	target := params[0]
+	out = "PING " + target
 	pr = nick + " pinged " + target
+	return
+}
+
+func silentping(params []string) (out, pr string) {
+	out = "PING " + params[0]
+	pr = ""
 	return
 }
 

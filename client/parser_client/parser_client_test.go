@@ -238,9 +238,39 @@ func TestPing(t *testing.T) {
 	pr := l.OutputMsg()
 
 	expPr := "user pinged target"
-	expOut := "PING :target"
+	expOut := "PING target"
 	test.Check(t, o, expOut)
 	test.Check(t, pr, expPr)
+
+	input = "/ping"
+	l, o, err = Parse(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr = l.OutputMsg()
+
+	expPr = "/ping: You must supply a ping target!"
+	expOut = ""
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+}
+
+func TestSilentPing(t *testing.T) {
+	input := "/silentping target"
+	nick := "user"
+	context := ""
+
+	l, o, err := Parse(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.OutputMsg()
+
+	expPr := ""
+	expOut := "PING target"
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
+
 }
 
 func TestHelp(t *testing.T) {
