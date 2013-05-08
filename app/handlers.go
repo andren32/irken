@@ -91,7 +91,7 @@ func initHandlers(ia *IrkenApp) {
 		ia.updateNicks(channel.Nicks, l.Context())
 	}
 
-	ia.handlers["JOIN"] = func(l *msg.Line) { // end of nick list
+	ia.handlers["JOIN"] = func(l *msg.Line) {
 		channel, ok := ia.cs.IrcChannels[l.Context()]
 		if !ok {
 			handleFatalErr(errors.New("366 Nicklist: Channel, " + l.Context() + ", doesn't exist. Raw: " + l.Raw()))
@@ -103,7 +103,19 @@ func initHandlers(ia *IrkenApp) {
 	}
 
 	ia.handlers["NICK"] = func(l *msg.Line) {
+		if len(l.Args()) == 1 {
+			prevNick := ia.cs.GetNick()
+			ia.cs.ChangeNick(l.Args()[0])
 
+			for context, channel := range ia.cs.IrcChannels {
+				if context != "" {
+					channel.ChangeNick(prevNick, ia.cs.GetNick())
+					ia.updateNicks(channel.Nicks, context)
+				}
+				ia.gui.WriteToChannel(l.Output(), context)
+			}
+		} else {
+		}
 	}
 	ia.handlers["PING"] = func(l *msg.Line) {
 		// TODO: Handle different for server and IRC users

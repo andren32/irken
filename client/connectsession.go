@@ -165,3 +165,12 @@ func (cs *ConnectSession) debugPrint(s string) {
 		fmt.Println(s)
 	}
 }
+
+func (cs *ConnectSession) GetNick() string {
+	return cs.nick
+}
+
+
+func (cs *ConnectSession) ChangeNick(nick string) {
+	cs.nick = nick
+}
