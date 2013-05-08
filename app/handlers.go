@@ -142,8 +142,24 @@ func initHandlers(ia *IrkenApp) {
 				ia.gui.WriteToChannel(l.Output(), context)
 			}
 		} else {
+			// TODO
 		}
 	}
+
+	ia.handlers["QUIT"] = func(l *msg.Line) {
+		for context, channel := range ia.cs.IrcChannels {
+			if context != "" {
+				channel.RemoveNick(l.Nick())
+				ia.updateNicks(channel.Nicks, context)
+			}
+			ia.gui.WriteToChannel(l.Output(), context)
+		}
+	}
+
+	ia.handlers["PART"] = func(l *msg.Line) {
+		ia.handlers["QUIT"](l)
+	}
+
 	ia.handlers["PING"] = func(l *msg.Line) {
 		// TODO: Handle different for server and IRC users
 		if len(l.Args()) > 0 {
