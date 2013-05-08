@@ -85,6 +85,11 @@ func Parse(message string) (l *msg.Line, err error) {
 		output, context = mode(l.Nick(), l.Args())
 	case "PRIVMSG":
 		output, context = privMsg(l.Nick(), l.Args())
+		r := "^\\W"
+		regex := regexp.MustCompile(r)
+		if !regex.MatchString(context) {
+			l.SetCmd("P2PMSG")
+		}
 	case "PART":
 		output, context = part(l.Nick(), l.Args())
 	case "PING":
@@ -159,7 +164,14 @@ func mode(nick string, params []string) (output, context string) {
 
 func privMsg(nick string, params []string) (output, context string) {
 	output = nick + ": " + params[len(params)-1]
-	context = params[0]
+	target := params[0]
+	r := "^\\W"
+	regex := regexp.MustCompile(r)
+	if regex.MatchString(target) {
+		context = target
+	} else {
+		context = ""
+	}
 	return
 }
 

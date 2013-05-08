@@ -42,42 +42,30 @@ func initHandlers(ia *IrkenApp) {
 
 	ia.handlers["CJOIN"] = func(l *msg.Line) {
 		if !ia.cs.IsConnected() {
-			err := ia.gui.WriteToChannel("Error: Not connected to any server",
+			err := ia.gui.WriteToChannel("/join: Not connected to any server",
 				"")
 			handleFatalErr(err)
 			return
 		}
 
-		chanCont := l.Context()
-		ia.cs.NewChannel(chanCont)
-
-		ia.gui.CreateChannelWindow(chanCont, func() {
-			text, err := ia.gui.GetEntryText(chanCont)
-			if err != nil {
-				err := ia.gui.WriteToChannel("Couldn't get input", chanCont)
-				handleFatalErr(err)
-			}
-			err = ia.cs.Send(text, chanCont)
-			if err != nil {
-				err := ia.gui.WriteToChannel("Couldn't parse input", chanCont)
-				handleFatalErr(err)
-			}
-			ia.gui.EmptyEntryText(chanCont)
-		})
-		ia.BeginInput(chanCont)
-		ia.gui.Notebook().NextPage()
-	}
-
-	ia.handlers["CPART"] = func(l *msg.Line) {
-		if !ia.cs.IsConnected() {
-			err := ia.gui.WriteToChannel("Error: Not in any channel", "")
+		if ia.cs.ChannelExist(l.Context()) {
+			err := ia.gui.WriteToChannel("/join: You have already joined "+
+				l.Context(), "")
 			handleFatalErr(err)
 			return
 		}
 
-		ia.cs.DeleteChannel(l.Context())
-		ia.EndInput(l.Context())
-		ia.gui.DeleteCurrentWindow()
+		ia.AddChatWindow(l.Context())
+	}
+
+	ia.handlers["CPART"] = func(l *msg.Line) {
+		if !ia.cs.IsConnected() {
+			err := ia.gui.WriteToChannel("/part: Not in any channel", "")
+			handleFatalErr(err)
+			return
+		}
+
+		ia.DeleteChatWindow(l.Context())
 	}
 
 	ia.handlers["CQUIT"] = func(l *msg.Line) {
@@ -123,4 +111,73 @@ func initHandlers(ia *IrkenApp) {
 		}
 		ia.cs.ResetPing()
 	}
+
+	ia.handlers["P2PMSG"] = func(l *msg.Line) {
+		actualCont := l.Nick()
+
+		if ia.cs.ChannelExist(actualCont) {
+			// just write to correct window
+			err := ia.gui.WriteToChannel(l.Output(), actualCont)
+			handleFatalErr(err)
+			return
+		}
+
+		ia.AddChatWindow(actualCont)
+		err := ia.gui.WriteToChannel("Beginning conversation with "+
+			actualCont, actualCont)
+		handleFatalErr(err)
+
+		err = ia.gui.WriteToChannel(l.Output(), actualCont)
+		handleFatalErr(err)
+
+	}
+
+	ia.handlers["CMSG"] = func(l *msg.Line) {
+		if !ia.cs.IsConnected() {
+			err := ia.gui.WriteToChannel("/msg: Not connected to any server",
+				"")
+			handleFatalErr(err)
+			return
+		}
+
+		if ia.cs.ChannelExist(l.Context()) {
+			err := ia.gui.WriteToChannel(l.Output(), l.Context())
+			handleFatalErr(err)
+			return
+		}
+
+		ia.AddChatWindow(l.Context())
+		err := ia.gui.WriteToChannel("Beginning conversation with "+
+			l.Context(), l.Context())
+		handleFatalErr(err)
+
+		err = ia.gui.WriteToChannel(l.Output(), l.Context())
+		handleFatalErr(err)
+	}
+}
+
+func (ia *IrkenApp) AddChatWindow(context string) {
+	ia.cs.NewChannel(context)
+
+	ia.gui.CreateChannelWindow(context, func() {
+		text, err := ia.gui.GetEntryText(context)
+		if err != nil {
+			err := ia.gui.WriteToChannel("Couldn't get input", context)
+			handleFatalErr(err)
+		}
+		err = ia.cs.Send(text, context)
+		if err != nil {
+			err := ia.gui.WriteToChannel("Couldn't parse input", context)
+			handleFatalErr(err)
+		}
+		ia.gui.EmptyEntryText(context)
+	})
+	ia.BeginInput(context)
+	ia.gui.Notebook().NextPage()
+}
+
+func (ia *IrkenApp) DeleteChatWindow(context string) {
+	ia.cs.DeleteChannel(context)
+	ia.EndInput(context)
+	ia.gui.DeleteCurrentWindow()
 }

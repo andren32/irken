@@ -143,6 +143,24 @@ func TestPrivMsg(t *testing.T) {
 	expCont := "#chan"
 	test.Check(t, msg, expMsg)
 	test.Check(t, cont, expCont)
+
+	input = ":_mrx!blabla@haxxor.com PRIVMSG user :Octotastic! I like pie btw :)"
+	l, err = Parse(input)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	msg = l.OutputMsg()
+	cont = l.Context()
+	cmd := l.Cmd()
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	expCmd := "P2PMSG"
+	expMsg = "_mrx: Octotastic! I like pie btw :)"
+	expCont = ""
+	test.Check(t, msg, expMsg)
+	test.Check(t, cont, expCont)
+	test.Check(t, cmd, expCmd)
 }
 
 func TestNick(t *testing.T) {
