@@ -144,6 +144,13 @@ func join(nick string, params []string) (out, pr, context string) {
 }
 
 func part(nick, context string) (out, pr string) {
+	r := "^\\w"
+	regex := regexp.MustCompile(r)
+	if regex.MatchString(context) {
+		out = ""
+		pr = nick + " has left the conversation with " + context
+		return
+	}
 	out = "PART " + context
 	pr = nick + " has left " + context
 	return
