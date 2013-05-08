@@ -48,6 +48,13 @@ func initHandlers(ia *IrkenApp) {
 			return
 		}
 
+		if l.Context() == "" {
+			err := ia.gui.WriteToChannel(l.Output(), l.Context())
+			handleFatalErr(err)
+			return
+
+		}
+
 		if ia.cs.ChannelExist(l.Context()) {
 			err := ia.gui.WriteToChannel("/join: You have already joined "+
 				l.Context(), "")
@@ -61,6 +68,13 @@ func initHandlers(ia *IrkenApp) {
 	ia.handlers["CPART"] = func(l *msg.Line) {
 		if !ia.cs.IsConnected() {
 			err := ia.gui.WriteToChannel("/part: Not in any channel", "")
+			handleFatalErr(err)
+			return
+		}
+
+		if l.Context() == "" {
+			err := ia.gui.WriteToChannel("/part: You can't \"part\" from the server",
+				l.Context())
 			handleFatalErr(err)
 			return
 		}
@@ -167,6 +181,12 @@ func initHandlers(ia *IrkenApp) {
 		handleFatalErr(err)
 
 		err = ia.gui.WriteToChannel(l.Output(), l.Context())
+		handleFatalErr(err)
+	}
+
+	ia.handlers["401"] = func(l *msg.Line) {
+		ia.DeleteChatWindow(l.Context())
+		err := ia.gui.WriteToChannel(l.Output(), "")
 		handleFatalErr(err)
 	}
 }

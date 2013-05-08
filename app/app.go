@@ -8,8 +8,8 @@ import (
 	"irken/gui"
 	"log"
 	"os/user"
-	"strconv"
 	"sort"
+	"strconv"
 )
 
 const DEFAULT_TITLE = "Irken"
@@ -113,9 +113,9 @@ func (ia *IrkenApp) EndInput(context string) {
 
 func (ia *IrkenApp) updateNicks(nicks map[string]string, context string) {
 	ia.gui.EmptyNicks(context)
-	var op 		[]string
-	var halfop 	[]string
-	var voice	[]string
+	var op []string
+	var halfop []string
+	var voice []string
 	var regular []string
 	for nick, perm := range nicks {
 		switch perm {

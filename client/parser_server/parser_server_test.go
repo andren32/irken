@@ -258,6 +258,20 @@ func TestPing(t *testing.T) {
 	test.Check(t, msg, expMsg)
 }
 
+func TestNoSuchTarget(t *testing.T) {
+	input := ":blabla.haxxor.com 401 user somenick :No such nick/channel"
+	l, err := Parse(input)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	msg := l.OutputMsg()
+	cont := l.Context()
+	expCont := "somenick"
+	expMsg := "somenick - No such nick/channel"
+	test.Check(t, cont, expCont)
+	test.Check(t, msg, expMsg)
+}
+
 func TestNumeric(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com 008 user :Something in the beginning"
 	l, err := Parse(input)

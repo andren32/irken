@@ -129,14 +129,32 @@ func chanMsg(nick, context string, params []string) (out, pr string) {
 }
 
 func privMsg(nick string, params []string) (out, pr, context string) {
+	if len(params) < 1 {
+		out = ""
+		context = ""
+		pr = "/msg: You must supply a target to /msg to"
+		return
+	}
+	if len(params) < 2 {
+		out = ""
+		context = ""
+		pr = "/msg: You must supply a message to send to " + params[0]
+		return
+	}
 	context = params[0]
 	msg := concatArgs(params[1:])
-	out = "PRIVMSG " + context + " :" + msg
+	out = "PRIVMSG " + context + " " + ":" + msg
 	pr = nick + ": " + msg
 	return
 }
 
 func join(nick string, params []string) (out, pr, context string) {
+	if len(params) == 0 {
+		out = ""
+		pr = "/join: Join what?"
+		context = ""
+		return
+	}
 	context = params[0]
 	out = "JOIN " + params[0]
 	pr = nick + " joined " + params[0]
@@ -151,14 +169,23 @@ func part(nick, context string) (out, pr string) {
 		pr = nick + " has left the conversation with " + context
 		return
 	}
+	if context == "" {
+		out = ""
+		pr = "You can't part from server!"
+		return
+	}
 	out = "PART " + context
 	pr = nick + " has left " + context
 	return
 }
 
 func quit(nick string, params []string) (out, pr string) {
-	msg := concatArgs(params)
-	out = "QUIT :" + msg
+	out = "QUIT"
+	var msg string
+	if len(params) > 0 {
+		msg = concatArgs(params)
+		out += " :" + msg
+	}
 	pr = nick + " has quit (" + msg + ")"
 	return
 }
