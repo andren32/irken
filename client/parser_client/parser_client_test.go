@@ -122,8 +122,8 @@ func TestClientMe(t *testing.T) {
 	cont := l.Context()
 
 	expCont := "#chan"
-	expOut := "PRIVMSG #chan :user is testing IRC"
-	expPr := "user is testing IRC"
+	expOut := "PRIVMSG #chan :\001ACTION is testing IRC\001"
+	expPr := "*user* is testing IRC"
 	test.Check(t, o, expOut)
 	test.Check(t, pr, expPr)
 	test.Check(t, cont, expCont)

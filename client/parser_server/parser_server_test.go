@@ -157,7 +157,7 @@ func TestPrivMsg(t *testing.T) {
 	}
 	expCmd := "P2PMSG"
 	expMsg = "_mrx: Octotastic! I like pie btw :)"
-	expCont = ""
+	expCont = "_mrx"
 	test.Check(t, msg, expMsg)
 	test.Check(t, cont, expCont)
 	test.Check(t, cmd, expCmd)
@@ -270,6 +270,23 @@ func TestNoSuchTarget(t *testing.T) {
 	expMsg := "somenick - No such nick/channel"
 	test.Check(t, cont, expCont)
 	test.Check(t, msg, expMsg)
+}
+
+func TestAction(t *testing.T) {
+	input := ":_mrx!blabla@haxxor.com PRIVMSG #chan :\001ACTION is tired\001"
+	l, err := Parse(input)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	msg := l.OutputMsg()
+	cmd := l.Cmd()
+	cont := l.Context()
+	expCmd := "PRIVMSG"
+	expCont := "#chan"
+	expMsg := "*_mrx* is tired"
+	test.Check(t, cont, expCont)
+	test.Check(t, msg, expMsg)
+	test.Check(t, cmd, expCmd)
 }
 
 func TestNumeric(t *testing.T) {

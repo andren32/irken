@@ -201,7 +201,14 @@ func quit(nick string, params []string) (out, pr string) {
 }
 
 func me(nick, context string, params []string) (out, pr string) {
-	// TODO
+	if len(params) < 1 {
+		out = ""
+		pr = "/me: must supply an action"
+		return
+	}
+	msg := concatArgs(params)
+	out = "PRIVMSG " + context + " :\001ACTION " + msg + "\001"
+	pr = "*" + nick + "* " + msg
 	return
 }
 

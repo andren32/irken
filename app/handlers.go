@@ -155,21 +155,19 @@ func initHandlers(ia *IrkenApp) {
 	}
 
 	ia.handlers["P2PMSG"] = func(l *msg.Line) {
-		actualCont := l.Nick()
-
-		if ia.cs.ChannelExist(actualCont) {
+		if ia.cs.ChannelExist(l.Context()) {
 			// just write to correct window
-			err := ia.gui.WriteToChannel(l.Output(), actualCont)
+			err := ia.gui.WriteToChannel(l.Output(), l.Context())
 			handleFatalErr(err)
 			return
 		}
 
-		ia.AddChatWindow(actualCont)
+		ia.AddChatWindow(l.Context())
 		err := ia.gui.WriteToChannel("Beginning conversation with "+
-			actualCont, actualCont)
+			l.Context(), l.Context())
 		handleFatalErr(err)
 
-		err = ia.gui.WriteToChannel(l.Output(), actualCont)
+		err = ia.gui.WriteToChannel(l.Output(), l.Context())
 		handleFatalErr(err)
 
 	}

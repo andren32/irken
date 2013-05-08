@@ -165,14 +165,22 @@ func mode(nick string, params []string) (output, context string) {
 }
 
 func privMsg(nick string, params []string) (output, context string) {
-	output = nick + ": " + params[len(params)-1]
+	trail := params[len(params)-1]
+	if strings.HasPrefix(trail, "\001ACTION") {
+		actionEnd := strings.LastIndex(trail, "\001")
+		msg := trail[7:actionEnd]
+		output = "*" + nick + "*" + msg
+	} else {
+		output = nick + ": " + trail
+	}
+
 	target := params[0]
 	r := "^\\W"
 	regex := regexp.MustCompile(r)
 	if regex.MatchString(target) {
 		context = target
 	} else {
-		context = ""
+		context = nick
 	}
 	return
 }
