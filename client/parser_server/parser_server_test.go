@@ -267,7 +267,7 @@ func TestNoSuchTarget(t *testing.T) {
 	msg := l.OutputMsg()
 	cont := l.Context()
 	expCont := "somenick"
-	expMsg := "blabla.haxxor.com: somenick - No such nick/channel"
+	expMsg := "somenick - No such nick/channel"
 	test.Check(t, cont, expCont)
 	test.Check(t, msg, expMsg)
 }

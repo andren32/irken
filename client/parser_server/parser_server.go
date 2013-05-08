@@ -115,7 +115,7 @@ func Parse(message string) (l *msg.Line, err error) {
 	case "366":
 		output, context = nickListEnd(l.Args())
 	case "401":
-		output, context = noSuchTarget(l.Nick(), l.Args())
+		output, context = noSuchTarget(l.Args())
 	default:
 		// check for numeric commands
 		r := regexp.MustCompile("^\\d+$")
@@ -267,12 +267,9 @@ func ping(params []string) (output, context string) {
 	return
 }
 
-func noSuchTarget(nick string, params []string) (output, context string) {
-	// TODO: Maybe return a "correct" context instead,
-	// and then delete the window with that associated context
-	// instead of current window
+func noSuchTarget(params []string) (output, context string) {
 	context = params[1]
-	output = nick + ": " + params[1] + " - " + params[2]
+	output = params[1] + " - " + params[2]
 	return
 }
 

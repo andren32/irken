@@ -129,14 +129,32 @@ func chanMsg(nick, context string, params []string) (out, pr string) {
 }
 
 func privMsg(nick string, params []string) (out, pr, context string) {
+	if len(params) < 1 {
+		out = ""
+		context = ""
+		pr = "/msg: You must supply a target to /msg to"
+		return
+	}
+	if len(params) < 2 {
+		out = ""
+		context = ""
+		pr = "/msg: You must supply a message to send to " + params[0]
+		return
+	}
 	context = params[0]
 	msg := concatArgs(params[1:])
-	out = "PRIVMSG " + context + " :" + msg
+	out = "PRIVMSG " + context + " " + ":" + msg
 	pr = nick + ": " + msg
 	return
 }
 
 func join(nick string, params []string) (out, pr, context string) {
+	if len(params) == 0 {
+		out = ""
+		pr = "/join: Join what?"
+		context = ""
+		return
+	}
 	context = params[0]
 	out = "JOIN " + params[0]
 	pr = nick + " joined " + params[0]

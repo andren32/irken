@@ -48,6 +48,13 @@ func initHandlers(ia *IrkenApp) {
 			return
 		}
 
+		if l.Context() == "" {
+			err := ia.gui.WriteToChannel(l.Output(), l.Context())
+			handleFatalErr(err)
+			return
+
+		}
+
 		if ia.cs.ChannelExist(l.Context()) {
 			err := ia.gui.WriteToChannel("/join: You have already joined "+
 				l.Context(), "")
@@ -167,7 +174,7 @@ func initHandlers(ia *IrkenApp) {
 
 	ia.handlers["401"] = func(l *msg.Line) {
 		ia.DeleteChatWindow(l.Context())
-		err := ia.gui.WriteToChannel(l.OutputMsg(), "")
+		err := ia.gui.WriteToChannel(l.Output(), "")
 		handleFatalErr(err)
 	}
 }
