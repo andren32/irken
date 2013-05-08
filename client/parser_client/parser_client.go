@@ -161,7 +161,7 @@ func me(nick, context string, params []string) (out, pr string) {
 
 func nickChange(nick string, params []string) (out, pr string) {
 	out = "NICK " + params[0]
-	pr = nick + " changed nick to " + params[0]
+	pr = ""
 	return
 }
 
