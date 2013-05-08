@@ -6,6 +6,7 @@
 package client
 
 import (
+	"fmt"
 	"irken/client/msg"
 	"irken/client/parser_client"
 	"irken/client/parser_server"
@@ -25,15 +26,17 @@ type ConnectSession struct {
 	pingFreq    time.Duration
 	pingResetCh chan struct{}
 	connected   bool
+	debug       bool
 }
 
-func NewConnectSession(nick string, realName string) *ConnectSession {
+func NewConnectSession(nick string, realName string, debug bool) *ConnectSession {
 	cs := &ConnectSession{
 		nick:        nick,
 		realName:    realName,
 		IrcChannels: make(map[string]*IRCChannel),
 		pingFreq:    time.Minute,
 		connected:   false,
+		debug:       debug,
 	}
 	cs.NewChannel("")
 	return cs
@@ -98,6 +101,9 @@ func (cs *ConnectSession) Send(s, context string) error {
 		if err != nil {
 			return err
 		}
+		cs.debugPrint("[" + time.Now().Format("15:04:05") + "]" +
+			" <-- " + output)
+
 	}
 	if line.OutputMsg() != "" {
 		cs.IrcChannels[context].Ch <- line
@@ -112,6 +118,8 @@ func (cs *ConnectSession) readToChannels() {
 			if err != nil {
 				// HANDLE ERROR...
 			}
+			cs.debugPrint("[" + time.Now().Format("15:04:05") + "]" +
+				" --> " + s)
 			line, err := parser_server.Parse(s)
 
 			if err != nil {
@@ -150,4 +158,10 @@ func (cs *ConnectSession) CloseConnection() {
 	cs.connected = false
 	cs.stopPings()
 	cs.Conn.Close()
+}
+
+func (cs *ConnectSession) debugPrint(s string) {
+	if cs.debug {
+		fmt.Println(s)
+	}
 }
