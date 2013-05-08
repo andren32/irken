@@ -198,6 +198,16 @@ func initHandlers(ia *IrkenApp) {
 	}
 
 	ia.handlers["401"] = func(l *msg.Line) {
+		// should not close window automatically on
+		// disconnect, just tell that the user has disconnected
+		prevCmd, ok := ia.prevCmd[l.Context()]
+		if ok && prevCmd == "CHAN" {
+			err := ia.gui.WriteToChannel(l.Context()+" has disconnected, either /part or wait for him/her to come online",
+				l.Context())
+			handleFatalErr(err)
+			return
+		}
+
 		ia.DeleteChatWindow(l.Context())
 		err := ia.gui.WriteToChannel(l.Output(), "")
 		handleFatalErr(err)

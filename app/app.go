@@ -26,6 +26,7 @@ type IrkenApp struct {
 	// map from a command string to an action
 	handlers  map[string]Handler
 	listeners map[string]chan struct{}
+	prevCmd   map[string]string
 }
 
 func NewIrkenApp(cfgPath string) *IrkenApp {
@@ -48,6 +49,7 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 		conf:      conf,
 		handlers:  make(map[string]Handler),
 		listeners: make(map[string]chan struct{}),
+		prevCmd:   make(map[string]string),
 	}
 	initHandlers(ia)
 
@@ -90,6 +92,8 @@ func (ia *IrkenApp) BeginInput(context string) {
 			case <-ch:
 				return
 			default:
+				// TODO: This should be two cases, not default.
+				// But somehow that breaks the program with /msg...
 				line := <-ia.cs.IrcChannels[context].Ch
 				gdk.ThreadsEnter()
 				handlErr := ia.handle(line)
@@ -100,8 +104,10 @@ func (ia *IrkenApp) BeginInput(context string) {
 					gdk.ThreadsLeave()
 					handleFatalErr(err)
 				}
+				// to handle user disconnects
+				// when a conversation already has begun
+				ia.prevCmd[context] = line.Cmd()
 			}
-
 		}
 	}()
 	return
