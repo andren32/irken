@@ -75,7 +75,7 @@ func (cs *ConnectSession) sendPings() {
 					return
 				}
 			case <-time.After(cs.pingFreq):
-				cs.Send("/ping "+cs.addr, "")
+				cs.Send("/silentping "+cs.addr, "")
 			}
 		}
 	}()
@@ -127,9 +127,9 @@ func (cs *ConnectSession) readToChannels() {
 			}
 
 			value, ok := cs.IrcChannels[line.Context()]
-			if !ok {
+			if !ok && line.OutputMsg() != "" {
 				cs.IrcChannels[""].Ch <- line
-			} else {
+			} else if line.OutputMsg() != "" {
 				value.Ch <- line
 			}
 		}
