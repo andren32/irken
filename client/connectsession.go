@@ -137,7 +137,7 @@ func (cs *ConnectSession) readToChannels() {
 }
 
 func (cs *ConnectSession) NewChannel(context string) {
-	cs.IrcChannels[context] = &IRCChannel{Ch: make(chan *msg.Line)}
+	cs.IrcChannels[context] = &IRCChannel{Ch: make(chan *msg.Line), Nicks: make(map[string]string)}
 	//TODO errorstuff
 }
 

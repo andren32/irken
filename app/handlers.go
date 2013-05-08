@@ -79,7 +79,7 @@ func initHandlers(ia *IrkenApp) {
 			handleFatalErr(errors.New("353 Nicklist: Channel, " + l.Context() + ", doesn't exist. Raw: " + l.Raw()))
 			return
 		}
-		channel.Nicks += l.OutputMsg() + " "
+		channel.AddNicks(l.OutputMsg())
 	}
 
 	ia.handlers["366"] = func(l *msg.Line) { // end of nick list
@@ -97,11 +97,14 @@ func initHandlers(ia *IrkenApp) {
 			handleFatalErr(errors.New("366 Nicklist: Channel, " + l.Context() + ", doesn't exist. Raw: " + l.Raw()))
 			return
 		}
-		channel.Nicks += l.Nick() + " "
+		channel.AddNicks(l.Nick())
 		ia.updateNicks(channel.Nicks, l.Context())
 		ia.gui.WriteToChannel(l.Output(), l.Context())
 	}
 
+	ia.handlers["NICK"] = func(l *msg.Line) {
+
+	}
 	ia.handlers["PING"] = func(l *msg.Line) {
 		// TODO: Handle different for server and IRC users
 		if len(l.Args()) > 0 {

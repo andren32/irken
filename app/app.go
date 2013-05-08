@@ -8,9 +8,8 @@ import (
 	"irken/gui"
 	"log"
 	"os/user"
-	"sort"
 	"strconv"
-	"strings"
+	"sort"
 )
 
 const DEFAULT_TITLE = "Irken"
@@ -112,12 +111,33 @@ func (ia *IrkenApp) EndInput(context string) {
 	close(ia.listeners[context])
 }
 
-func (ia *IrkenApp) updateNicks(s, context string) {
-	s = strings.TrimSpace(s)
-	nicks := strings.Split(s, " ")
-	sort.Strings(nicks)
+func (ia *IrkenApp) updateNicks(nicks map[string]string, context string) {
 	ia.gui.EmptyNicks(context)
-	for _, v := range nicks {
+	var op 		[]string
+	var halfop 	[]string
+	var voice	[]string
+	var regular []string
+	for nick, perm := range nicks {
+		switch perm {
+		case "@":
+			op = append(op, perm+nick)
+		case "%":
+			halfop = append(halfop, perm+nick)
+		case "+":
+			voice = append(voice, perm+nick)
+		default:
+			regular = append(regular, perm+nick)
+		}
+	}
+	var allSorted []string
+	sort.Strings(op)
+	sort.Strings(halfop)
+	sort.Strings(voice)
+	sort.Strings(regular)
+	allSorted = append(op, halfop...)
+	allSorted = append(allSorted, voice...)
+	allSorted = append(allSorted, regular...)
+	for _, v := range allSorted {
 		ia.gui.WriteToNicks(v, context)
 	}
 }
