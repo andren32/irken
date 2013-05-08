@@ -128,6 +128,11 @@ func Parse(message, nick, context string) (l *msg.Line,
 }
 
 func chanMsg(nick, context string, params []string) (out, pr string) {
+	if context == "" {
+		out = ""
+		pr = "Error: you can only chat in a channel or conversation window"
+		return
+	}
 	out = "PRIVMSG " + context + " :" + params[0]
 	pr = nick + ": " + params[0]
 	return

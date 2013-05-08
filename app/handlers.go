@@ -24,6 +24,19 @@ func initHandlers(ia *IrkenApp) {
 		}
 	}
 
+	ia.handlers["CHAN"] = func(l *msg.Line) {
+		if !ia.cs.IsConnected() {
+			err := ia.gui.WriteToChannel("Error: Must be connected to chat",
+				l.Context())
+			handleFatalErr(err)
+			return
+		}
+
+		err := ia.gui.WriteToChannel(l.Output(), l.Context())
+		handleFatalErr(err)
+
+	}
+
 	// ia.handlers["CDISCONNECT"] = func(l *msg.Line) {
 	// 	if !ia.cs.IsConnected() {
 	// 		err := ia.gui.WriteToChannel("You are not connected to any server", "")
