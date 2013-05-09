@@ -226,6 +226,29 @@ func initHandlers(ia *IrkenApp) {
 		err := ia.gui.WriteToChannel(l.Output(), "")
 		handleFatalErr(err)
 	}
+
+	ia.handlers["CRAW"] = func(l *msg.Line) {
+		if !ia.cs.IsDebugging() {
+			err := ia.gui.WriteToChannel("/raw: Only available in debug mode",
+				l.Context())
+			handleFatalErr(err)
+			return
+		}
+
+		if !ia.cs.IsConnected() {
+			err := ia.gui.WriteToChannel("/raw: Can only send when connected",
+				l.Context())
+			handleFatalErr(err)
+			return
+
+		}
+
+		ia.cs.SendRaw(l.OutputMsg())
+		err := ia.gui.WriteToChannel(l.Output(),
+			l.Context())
+		handleFatalErr(err)
+
+	}
 }
 
 func (ia *IrkenApp) AddChatWindow(context string) {

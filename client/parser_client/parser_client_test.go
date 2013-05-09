@@ -321,7 +321,22 @@ func TestHelp(t *testing.T) {
 	expOut := ""
 	test.Check(t, o, expOut)
 	test.Check(t, pr, expPr)
+}
 
+func TestRaw(t *testing.T) {
+	input := "/raw :CMD with some :args"
+	nick := ""
+	context := ""
+	l, o, err := Parse(input, nick, context)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	pr := l.OutputMsg()
+
+	expPr := ":CMD with some :args"
+	expOut := ""
+	test.Check(t, o, expOut)
+	test.Check(t, pr, expPr)
 }
 
 func TestInvalidCommand(t *testing.T) {

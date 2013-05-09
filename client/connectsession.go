@@ -96,18 +96,27 @@ func (cs *ConnectSession) Send(s, context string) error {
 		return err
 	}
 
-	if cs.IsConnected() && output != "" {
-		err = cs.Conn.Write(output)
+	err = cs.SendRaw(output)
+	if err != nil {
+		return err
+	}
+
+	if line.OutputMsg() != "" {
+		cs.IrcChannels[context].Ch <- line
+	}
+	return nil
+}
+
+func (cs *ConnectSession) SendRaw(s string) error {
+	if cs.IsConnected() && s != "" {
+		err := cs.Conn.Write(s)
 		if err != nil {
 			return err
 		}
 		cs.debugPrint("[" + time.Now().Format("15:04:05") + "]" +
-			" <-- " + output)
+			" <-- " + s)
+	}
 
-	}
-	if line.OutputMsg() != "" {
-		cs.IrcChannels[context].Ch <- line
-	}
 	return nil
 }
 
@@ -170,7 +179,10 @@ func (cs *ConnectSession) GetNick() string {
 	return cs.nick
 }
 
-
 func (cs *ConnectSession) ChangeNick(nick string) {
 	cs.nick = nick
+}
+
+func (cs *ConnectSession) IsDebugging() bool {
+	return cs.debug
 }

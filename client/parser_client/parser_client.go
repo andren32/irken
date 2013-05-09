@@ -103,6 +103,8 @@ func Parse(message, nick, context string) (l *msg.Line,
 	case "CHELP":
 		// only arguments are important
 		out, pr = "", ""
+	case "CRAW":
+		out, pr = raw(l.Args())
 	default:
 		// TODO: Remove all error handling, should
 		// instead just parse an error msg
@@ -256,6 +258,16 @@ func disconnect(nick string, params []string) (out, pr string) {
 	msg := concatArgs(params)
 	out = "QUIT :" + msg
 	pr = nick + " disconnected"
+	return
+}
+
+func raw(params []string) (out, pr string) {
+	out = ""
+	if len(params) == 0 {
+		pr = ""
+		return
+	}
+	pr = concatArgs(params)
 	return
 }
 
