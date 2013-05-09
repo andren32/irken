@@ -255,9 +255,13 @@ func connect(nick string, params []string) (pr string) {
 }
 
 func disconnect(nick string, params []string) (out, pr string) {
+	if len(params) == 0 {
+		out = "QUIT"
+		pr = "/disconnect: " + nick + " disconnected"
+	}
 	msg := concatArgs(params)
 	out = "QUIT :" + msg
-	pr = nick + " disconnected"
+	pr = nick + " disconnected (" + msg + ")"
 	return
 }
 

@@ -219,7 +219,7 @@ func TestDisconnect(t *testing.T) {
 	}
 	pr := l.OutputMsg()
 
-	expPr := "user disconnected"
+	expPr := "user disconnected (Bye bye)"
 	expOut := "QUIT :Bye bye"
 	test.Check(t, o, expOut)
 	test.Check(t, pr, expPr)

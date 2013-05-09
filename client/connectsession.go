@@ -26,8 +26,9 @@ type ConnectSession struct {
 
 	pingFreq    time.Duration
 	pingResetCh chan struct{}
-	connected   bool
-	debug       bool
+
+	connected bool
+	debug     bool
 }
 
 func NewConnectSession(nick string, realName string, debug bool) *ConnectSession {
@@ -114,8 +115,7 @@ func (cs *ConnectSession) SendRaw(s string) error {
 		if err != nil {
 			return err
 		}
-		cs.debugPrint("[" + time.Now().Format("15:04:05") + "]" +
-			" <-- " + s)
+		cs.debugPrint("<-- " + s)
 	}
 
 	return nil
@@ -126,14 +126,15 @@ func (cs *ConnectSession) readToChannels() {
 		for cs.connected {
 			s, err := cs.Conn.Read()
 			if err != nil {
-				// HANDLE ERROR...
+				cs.debugPrint("Couldn't read from connection to " + cs.addr)
+				continue
 			}
-			cs.debugPrint("[" + time.Now().Format("15:04:05") + "]" +
-				" --> " + s)
+			cs.debugPrint("--> " + s)
 			line, err := parser_server.Parse(s)
 
 			if err != nil {
-				// HANDLE ERROR...
+				cs.debugPrint("Couldn't parse message from server")
+				continue
 			}
 
 			value, ok := cs.IrcChannels[line.Context()]
@@ -173,7 +174,7 @@ func (cs *ConnectSession) CloseConnection() {
 func (cs *ConnectSession) debugPrint(s string) {
 	if cs.debug {
 		s = strings.Replace(s, "\001", "\\001", -1)
-		fmt.Println(s)
+		fmt.Println("[" + time.Now().Format("15:04:05") + "] " + s)
 	}
 }
 
