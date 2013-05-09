@@ -150,8 +150,8 @@ func (gui *GUI) DeleteChannelWindow(context string) error {
 	len := gui.notebook.GetNPages()
 	for i := 0; i < len; i++ {
 		page := gui.notebook.GetNthPage(i)
-		if page.GetLabel() == context {
-			gui.notebook.RemovePage(nil, page)
+		if gui.notebook.GetTabLabelText(page) == context {
+			gui.notebook.RemovePage(nil, i)
 			gui.window.ShowAll()
 			return nil
 		}

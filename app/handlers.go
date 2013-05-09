@@ -280,5 +280,5 @@ func (ia *IrkenApp) AddChatWindow(context string) {
 func (ia *IrkenApp) DeleteChatWindow(context string) {
 	ia.cs.DeleteChannel(context)
 	ia.EndInput(context)
-	ia.gui.DeleteCurrentWindow()
+	ia.gui.DeleteChannelWindow(context)
 }
