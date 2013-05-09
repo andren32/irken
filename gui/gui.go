@@ -55,7 +55,6 @@ func NewGUI(title string, width, height int) *GUI {
 		width: width, height: height}
 
 	gui.createMenu(vbox)
-	gui.settingsBox = gtk.NewVBox(false, 0)
 
 	return gui
 }
@@ -277,6 +276,7 @@ func (gui *GUI) createMenu(vbox *gtk.VBox) {
 
 	settings := gtk.NewMenuItemWithMnemonic("_Settings")
 	settings.Connect("activate", func() {
+
 		gui.settingspopup = gtk.NewWindow(gtk.WINDOW_TOPLEVEL)
 		gui.settingspopup.SetPosition(gtk.WIN_POS_CENTER)
 		gui.settingspopup.SetTitle("Settings")
@@ -285,6 +285,7 @@ func (gui *GUI) createMenu(vbox *gtk.VBox) {
 			println("settings window got destroy!", ctx.Data().(string))
 			gui.CloseSettingsWindow()
 		}, "foo")
+		gui.settingsBox = gtk.NewVBox(false, 0)
 
 		gui.sf() // settings function
 
@@ -360,5 +361,5 @@ func (gui *GUI) SetSettingsFunc (settingsfunc func()) {
 }
 
 func (gui *GUI) CloseSettingsWindow() {
-	gui.settingspopup.Destroy()
+	gui.settingspopup.Hide()
 }
