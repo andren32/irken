@@ -289,6 +289,20 @@ func TestAction(t *testing.T) {
 	test.Check(t, cmd, expCmd)
 }
 
+func TestForwarding(t *testing.T) {
+	input := ":blabla.haxxor.com 470 user #oldchan #newchan :Forwarding to new channel"
+	l, err := Parse(input)
+	if err != nil {
+		test.UnExpErr(t, err)
+	}
+	msg := l.OutputMsg()
+	cont := l.Context()
+	expCont := "#newchan"
+	expMsg := "#oldchan --> #newchan: Forwarding to new channel"
+	test.Check(t, cont, expCont)
+	test.Check(t, msg, expMsg)
+}
+
 func TestNumeric(t *testing.T) {
 	input := ":_mrx!blabla@haxxor.com 008 user :Something in the beginning"
 	l, err := Parse(input)

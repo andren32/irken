@@ -116,6 +116,8 @@ func Parse(message string) (l *msg.Line, err error) {
 		output, context = nickListEnd(l.Args())
 	case "401":
 		output, context = noSuchTarget(l.Args())
+	case "470":
+		output, context = forward(l.Args())
 	default:
 		// check for numeric commands
 		r := regexp.MustCompile("^\\d+$")
@@ -278,6 +280,16 @@ func ping(params []string) (output, context string) {
 func noSuchTarget(params []string) (output, context string) {
 	context = params[1]
 	output = params[1] + " - " + params[2]
+	return
+}
+
+func forward(params []string) (output, context string) {
+	oldChan := params[1]
+	newChan := params[2]
+	msg := params[3]
+
+	output = oldChan + " --> " + newChan + ": " + msg
+	context = newChan
 	return
 }
 
