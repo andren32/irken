@@ -91,7 +91,7 @@ func Parse(message, nick, context string) (l *msg.Line,
 	case "CQUIT":
 		out, pr = quit(nick, l.Args())
 	case "CCONNECT":
-		pr = connect(nick, l.Args())
+		out, pr = connect(nick, l.Args())
 	case "CDISCONNECT":
 		out, pr = disconnect(nick, l.Args())
 	case "CPING":
@@ -106,12 +106,8 @@ func Parse(message, nick, context string) (l *msg.Line,
 	case "CRAW":
 		out, pr = raw(l.Args())
 	default:
-		// TODO: Remove all error handling, should
-		// instead just parse an error msg
-		// to the current window
 		out = ""
 		pr = "/" + strings.ToLower(l.Cmd()[1:]) + ": Unknown command"
-
 	}
 
 	if err != nil {
@@ -249,8 +245,9 @@ func silentpong(params []string) (out, pr string) {
 }
 
 // -- Client commands --
-func connect(nick string, params []string) (pr string) {
-	pr = nick + " connected to " + params[len(params)-1]
+func connect(nick string, params []string) (out, pr string) {
+	out = ""
+	pr = nick + " connected to " + params[0]
 	return
 }
 
