@@ -140,8 +140,8 @@ func initHandlers(ia *IrkenApp) {
 				channel.ChangeNick(prevNick, l.Args()[0])
 				ia.updateNicks(channel.Nicks, context)
 				fmt.Println(channel.Nicks)
+				ia.gui.WriteToChannel(l.Output(), context)
 			}
-			ia.gui.WriteToChannel(l.Output(), context)
 		}
 	}
 
