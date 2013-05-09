@@ -107,6 +107,7 @@ func (ia *IrkenApp) BeginInput(context string) {
 		for {
 			select {
 			case <-ch:
+				delete(ia.activeChans, context)
 				return
 			default:
 				line := <-ia.cs.IrcChannels[context].Ch
@@ -303,7 +304,7 @@ func (ia *IrkenApp) WriteToChatWindow(s, context string) {
 
 func (ia *IrkenApp) CurrentWindowsContexts() []string {
 	a := make([]string, 0)
-	for context, _ := range ia.activeChans {
+	for context, _ := range ia.cs.IrcChannels {
 		if context != "" {
 			a = append(a, context)
 		}
