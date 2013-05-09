@@ -130,19 +130,18 @@ func initHandlers(ia *IrkenApp) {
 	}
 
 	ia.handlers["NICK"] = func(l *msg.Line) {
-		if len(l.Args()) == 1 {
-			prevNick := ia.cs.GetNick()
+		prevNick := l.Nick()
+		if prevNick == ia.cs.GetNick() {
 			ia.cs.ChangeNick(l.Args()[0])
+		}
 
-			for context, channel := range ia.cs.IrcChannels {
-				if context != "" {
-					channel.ChangeNick(prevNick, ia.cs.GetNick())
-					ia.updateNicks(channel.Nicks, context)
-				}
-				ia.gui.WriteToChannel(l.Output(), context)
+		for context, channel := range ia.cs.IrcChannels {
+			if context != "" {
+				channel.ChangeNick(prevNick, l.Args()[0])
+				ia.updateNicks(channel.Nicks, context)
+				fmt.Println(channel.Nicks)
 			}
-		} else {
-			// TODO
+			ia.gui.WriteToChannel(l.Output(), context)
 		}
 	}
 

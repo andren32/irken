@@ -48,11 +48,11 @@ func (cs *ConnectSession) Connect(addr string) error {
 		return err
 	}
 	// Register the user
-	err = Conn.Write("NICK " + cs.nick + "\r\n")
+	err = Conn.Write("NICK " + cs.nick)
 	if err != nil {
 		return err
 	}
-	err = Conn.Write("USER " + cs.nick + " 0 * :" + cs.realName + "\r\n")
+	err = Conn.Write("USER " + cs.nick + " 0 * :" + cs.realName)
 	if err != nil {
 		return err
 	}
