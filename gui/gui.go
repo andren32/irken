@@ -17,7 +17,6 @@ type GUI struct {
 	window   *gtk.Window
 	notebook *gtk.Notebook
 	pages    map[string]*Page
-	menuItem *gtk.MenuItem
 	settingsBox *gtk.VBox
 	settingspopup *gtk.Window
 	sf SettingsFunc 
@@ -292,7 +291,36 @@ func (gui *GUI) createMenu(vbox *gtk.VBox) {
 		gui.settingspopup.Add(gui.settingsBox)
 		gui.settingspopup.ShowAll()
 	})
+
 	submenu.Append(settings)
+
+	cascademenu = gtk.NewMenuItemWithMnemonic("_Help")
+	menubar.Append(cascademenu)
+	submenu = gtk.NewMenu()
+	cascademenu.SetSubmenu(submenu)
+
+	menuitem = gtk.NewMenuItemWithMnemonic("_Info")
+	menuitem.Connect("activate", func() {
+		dialog := gtk.NewMessageDialog(gui.window, gtk.DIALOG_DESTROY_WITH_PARENT,
+			gtk.MESSAGE_INFO, gtk.BUTTONS_OK, "%s",
+			"Irken works like most IRC-clients. All commands start with forward-slash(/).\n\nFor a list of commands type /help")
+		dialog.Run()
+		dialog.Destroy()
+	})
+
+	submenu.Append(menuitem)
+
+	menuitem = gtk.NewMenuItemWithMnemonic("_About")
+	menuitem.Connect("activate", func() {
+		dialog := gtk.NewAboutDialog()
+		dialog.SetName("About")
+		dialog.SetProgramName("Irken")
+		dialog.SetAuthors([]string{"André Nyström - github.com/andren32", "Axel Riese - github.com/axelri"})
+		dialog.Run()
+		dialog.Destroy()
+	})
+
+	submenu.Append(menuitem)
 }
 
 // AddSetting adds a setting to the setting menu in the form of an entry.
