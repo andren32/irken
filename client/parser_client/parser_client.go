@@ -80,14 +80,8 @@ func Parse(message, nick, context string) (l *msg.Line,
 		out, pr, cont = join(nick, l.Args())
 	case "CNICK":
 		out, pr = nickChange(nick, l.Args())
-	case "CLEAVE":
-		out, pr = part(nick, context)
-		l.SetCmd("CPART")
 	case "CPART":
 		out, pr = part(nick, context)
-	case "CEXIT":
-		out, pr = quit(nick, l.Args())
-		l.SetCmd("CQUIT")
 	case "CQUIT":
 		out, pr = quit(nick, l.Args())
 	case "CCONNECT":
@@ -100,11 +94,10 @@ func Parse(message, nick, context string) (l *msg.Line,
 		out, pr = silentping(l.Args())
 	case "CSILENTPONG":
 		out, pr = silentpong(l.Args())
-	case "CHELP":
-		// only arguments are important
-		out, pr = "", ""
 	case "CRAW":
 		out, pr = raw(l.Args())
+	case "CHELP":
+		out, pr = "", ""
 	default:
 		out = ""
 		pr = "/" + strings.ToLower(l.Cmd()[1:]) + ": Unknown command"
