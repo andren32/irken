@@ -175,7 +175,7 @@ func (gui *GUI) WriteToChannel(s, context string) error {
 	textBuffer.GetEndIter(&endIter)
 	textBuffer.Insert(&endIter, s+"\n")
 
-	gui.AutoScroll(textBuffer, &endIter)
+	gui.AutoScroll(page.textView, &endIter)
 	return nil
 }
 
@@ -200,7 +200,7 @@ func (gui *GUI) WriteToCurrentWindow(s string) error {
 	textBuffer.GetEndIter(&endIter)
 	textBuffer.Insert(&endIter, s+"\n")
 
-	gui.AutoScroll(textBuffer, &endIter)
+	gui.AutoScroll(page.textView, &endIter)
 	return nil
 }
 
@@ -226,8 +226,8 @@ func (gui *GUI) EmptyNicks(context string) error {
 	return nil
 }
 
-func (gui *GUI) AutoScroll(textbuffer *gtk.TextBuffer, endIter *gtk.TextIter) {
-	// TODO
+func (gui *GUI) AutoScroll(textview *gtk.TextView, endIter *gtk.TextIter) {
+	textview.ScrollToIter(endIter, 0.0, true, 0.0, 0.0)
 }
 
 func (gui *GUI) GetEntryText(context string) (string, error) {
