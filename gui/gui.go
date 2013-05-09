@@ -9,6 +9,8 @@ import (
 	"unsafe"
 )
 
+type SettingsFunc func()
+
 type GUI struct {
 	width    int
 	height   int
@@ -16,6 +18,9 @@ type GUI struct {
 	notebook *gtk.Notebook
 	pages    map[string]*Page
 	menuItem *gtk.MenuItem
+	settingsBox *gtk.VBox
+	settingspopup *gtk.Window
+	sf SettingsFunc 
 }
 
 type Page struct {
@@ -41,16 +46,19 @@ func NewGUI(title string, width, height int) *GUI {
 
 	vbox := gtk.NewVBox(false, 0)
 
-	//CreateMenu(vbox)
-
 	notebook := gtk.NewNotebook()
 
 	vbox.Add(notebook)
 	window.Add(vbox)
 	window.SetSizeRequest(width, height)
 
-	return &GUI{window: window, notebook: notebook, pages: make(map[string]*Page),
+	gui := &GUI{window: window, notebook: notebook, pages: make(map[string]*Page),
 		width: width, height: height}
+
+	gui.createMenu(vbox)
+	gui.settingsBox = gtk.NewVBox(false, 0)
+
+	return gui
 }
 
 func (gui *GUI) StartMain() {
@@ -245,12 +253,12 @@ func (gui *GUI) Notebook() *gtk.Notebook {
 	return gui.notebook
 }
 
-func CreateMenu(vbox *gtk.VBox) {
+func (gui *GUI) createMenu(vbox *gtk.VBox) {
 	menubar := gtk.NewMenuBar()
 	vbox.PackStart(menubar, false, false, 0)
 
 	menuitem := gtk.NewMenuItem()
-	vbox.PackStart(menubar, false, false, 0)
+	vbox.PackStart(menuitem, false, false, 0)
 
 	cascademenu := gtk.NewMenuItemWithMnemonic("_File")
 	menubar.Append(cascademenu)
@@ -270,7 +278,59 @@ func CreateMenu(vbox *gtk.VBox) {
 
 	settings := gtk.NewMenuItemWithMnemonic("_Settings")
 	settings.Connect("activate", func() {
+		gui.settingspopup = gtk.NewWindow(gtk.WINDOW_TOPLEVEL)
+		gui.settingspopup.SetPosition(gtk.WIN_POS_CENTER)
+		gui.settingspopup.SetTitle("Settings")
+		gui.settingspopup.SetKeepAbove(true)
+		gui.settingspopup.Connect("destroy", func(ctx *glib.CallbackContext) {
+			println("settings window got destroy!", ctx.Data().(string))
+			gui.CloseSettingsWindow()
+		}, "foo")
 
+		gui.sf() // settings function
+
+		gui.settingspopup.Add(gui.settingsBox)
+		gui.settingspopup.ShowAll()
 	})
 	submenu.Append(settings)
+}
+
+// AddSetting adds a setting to the setting menu in the form of an entry.
+// Takes the setting name and the initialtext in the entry and returns
+// a pointer to the entry.
+func (gui *GUI) AddSetting(settingsName, initialText string) *gtk.Entry {
+	vbox := gtk.NewVBox(false, 0)
+
+	hbox1 := gtk.NewHBox(false, 0)
+	label := gtk.NewLabel(settingsName)
+	hbox1.Add(label)
+	vbox.Add(hbox1)
+
+	hbox2 := gtk.NewHBox(false, 0)
+	entry := gtk.NewEntry()
+	entry.SetEditable(true)
+	entry.SetText(initialText)
+	hbox2.Add(entry)
+	vbox.Add(hbox2)
+
+	gui.settingsBox.Add(vbox)
+	return entry
+}
+
+// AddSettingButton adds a button to the settings menu with the label 
+// of the first argument. Calls on buttonFunc on click
+func (gui *GUI) AddSettingButton (text string, buttonFunc func()) {
+	vbox := gtk.NewVBox(false, 0)
+	button := gtk.NewButtonWithLabel(text)
+	button.Clicked(buttonFunc)
+	vbox.Add(button)
+	gui.settingsBox.Add(vbox)
+}
+
+func (gui *GUI) SetSettingsFunc (settingsfunc func()) {
+	gui.sf = settingsfunc
+}
+
+func (gui *GUI) CloseSettingsWindow() {
+	gui.settingspopup.Destroy()
 }
