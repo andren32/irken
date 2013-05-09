@@ -24,9 +24,9 @@ type IrkenApp struct {
 
 	conf *client.Config
 	// map from a command string to an action
-	handlers  map[string]Handler
-	listeners map[string]chan struct{}
-	prevCmd   map[string]string
+	handlers    map[string]Handler
+	activeChans map[string]chan struct{}
+	prevCmd     map[string]string
 }
 
 func NewIrkenApp(cfgPath string) *IrkenApp {
@@ -45,14 +45,13 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 	g := gui.NewGUI(DEFAULT_TITLE, wWidth, wHeight)
 	cs := client.NewConnectSession(nick, realname, debug)
 	ia := &IrkenApp{
-		gui:       g,
-		cs:        cs,
-		conf:      conf,
-		handlers:  make(map[string]Handler),
-		listeners: make(map[string]chan struct{}),
-		prevCmd:   make(map[string]string),
+		gui:         g,
+		cs:          cs,
+		conf:        conf,
+		handlers:    make(map[string]Handler),
+		activeChans: make(map[string]chan struct{}),
+		prevCmd:     make(map[string]string),
 	}
-	initHandlers(ia)
 
 	g.CreateChannelWindow(DEFAULT_CONT, func() {
 		text, err := g.GetEntryText("")
@@ -103,18 +102,16 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 
 func (ia *IrkenApp) BeginInput(context string) {
 	ch := make(chan struct{})
-	ia.listeners[context] = ch
+	ia.activeChans[context] = ch
 	go func() {
 		for {
 			select {
 			case <-ch:
 				return
 			default:
-				// TODO: This should be two cases, not default.
-				// But somehow that breaks the program with /msg...
 				line := <-ia.cs.IrcChannels[context].Ch
 				gdk.ThreadsEnter()
-				handlErr := ia.handle(line)
+				handlErr := ia.Handle(line)
 				gdk.ThreadsLeave()
 				if handlErr != nil {
 					gdk.ThreadsEnter()
@@ -132,10 +129,16 @@ func (ia *IrkenApp) BeginInput(context string) {
 }
 
 func (ia *IrkenApp) EndInput(context string) {
-	close(ia.listeners[context])
+	close(ia.activeChans[context])
 }
 
-func (ia *IrkenApp) updateNicks(nicks map[string]string, context string) {
+func (ia *IrkenApp) UpdateNicks(context string) {
+	channel, ok := ia.cs.IrcChannels[context]
+	if !ok {
+		handleFatalErr(errors.New("No such channel " + context))
+	}
+	nicks := channel.Nicks
+
 	ia.gui.EmptyNicks(context)
 	var op []string
 	var halfop []string
@@ -170,7 +173,7 @@ func (ia *IrkenApp) GUI() *gui.GUI {
 	return ia.gui
 }
 
-func (ia *IrkenApp) AddHandler(h Handler, cmd string) (err error) {
+func (ia *IrkenApp) AddHandler(cmd string, h Handler) (err error) {
 	_, ok := ia.handlers[cmd]
 	if ok {
 		return errors.New("Command already has a handler")
@@ -179,7 +182,7 @@ func (ia *IrkenApp) AddHandler(h Handler, cmd string) (err error) {
 	return
 }
 
-func (ia *IrkenApp) handle(l *msg.Line) (err error) {
+func (ia *IrkenApp) Handle(l *msg.Line) (err error) {
 	h, ok := ia.handlers[l.Cmd()]
 	if !ok {
 		return errors.New("Couldn't find a handler")
@@ -236,6 +239,137 @@ func loadCfg(filename string) (c *client.Config, err error) {
 	}
 
 	return
+}
+
+func (ia *IrkenApp) AddChatWindow(context string) {
+	ia.cs.NewChannel(context)
+
+	ia.gui.CreateChannelWindow(context, func() {
+		text, err := ia.gui.GetEntryText(context)
+		if err != nil {
+			err := ia.gui.WriteToChannel("Couldn't get input", context)
+			handleFatalErr(err)
+		}
+		err = ia.cs.Send(text, context)
+		if err != nil {
+			err := ia.gui.WriteToChannel("Couldn't parse input", context)
+			handleFatalErr(err)
+		}
+		ia.gui.EmptyEntryText(context)
+	})
+	ia.BeginInput(context)
+	ia.gui.Notebook().NextPage()
+}
+
+func (ia *IrkenApp) DeleteChatWindow(context string) {
+	ia.cs.DeleteChannel(context)
+	ia.EndInput(context)
+	ia.gui.DeleteChannelWindow(context)
+}
+
+func (ia *IrkenApp) HasConnection() bool {
+	return ia.cs.IsConnected()
+}
+
+func (ia *IrkenApp) Connect(addr string) error {
+	return ia.cs.Connect(addr)
+}
+
+func (ia *IrkenApp) Disconnect() error {
+	if !ia.HasConnection() {
+		return errors.New("Already disconnected")
+	}
+	ia.cs.CloseConnection()
+	return nil
+}
+
+func (ia *IrkenApp) WriteToChatWindow(s, context string) {
+	err := ia.gui.WriteToChannel(s, context)
+	handleFatalErr(err)
+}
+
+func (ia *IrkenApp) CurrentWindowsContexts() []string {
+	a := make([]string, 0)
+	for context, _ := range ia.activeChans {
+		if context != "" {
+			a = append(a, context)
+		}
+	}
+	return a
+}
+
+func (ia *IrkenApp) AddNicks(channel, nicks string) error {
+	ch, ok := ia.cs.IrcChannels[channel]
+	if !ok {
+		handleFatalErr(errors.New("No such channel " + channel + " registered"))
+	}
+	ch.AddNicks(nicks)
+	return nil
+}
+
+func (ia *IrkenApp) ChangeNick(channel, oldNick, newNick string) {
+	ch, ok := ia.cs.IrcChannels[channel]
+	if !ok {
+		handleFatalErr(errors.New("No such channel " + channel + " registered"))
+	}
+	ch.ChangeNick(oldNick, newNick)
+}
+
+func (ia *IrkenApp) RemoveNick(channel, nick string) {
+	ch, ok := ia.cs.IrcChannels[channel]
+	if !ok {
+		handleFatalErr(errors.New("No such channel " + channel + " registered"))
+	}
+	ch.RemoveNick(nick)
+}
+
+func (ia *IrkenApp) AddNewNick(channel, nick string) error {
+	ch, ok := ia.cs.IrcChannels[channel]
+	if !ok {
+		return errors.New("No such channel " + channel + " registered")
+	}
+	ch.AddNick(nick, "")
+	return nil
+}
+
+func (ia *IrkenApp) HasChannel(context string) bool {
+	_, ok := ia.activeChans[context]
+	return ok
+}
+
+func (ia *IrkenApp) CurrentNick() string {
+	return ia.cs.GetNick()
+}
+
+func (ia *IrkenApp) ChangeUserNick(nick string) {
+	ia.cs.ChangeNick(nick)
+}
+
+func (ia *IrkenApp) SendToCurrentServer(s string) error {
+	if !ia.cs.IsConnected() {
+		return errors.New("Can't send - not connected")
+	}
+	ia.cs.SendRaw(s)
+	return nil
+}
+
+func (ia *IrkenApp) RecentChannelCmd(channel string) (cmd string, err error) {
+	cmd, ok := ia.prevCmd[channel]
+	if !ok {
+		err = errors.New("RecentChannelCmd: No such channel " + channel)
+	}
+	return
+}
+
+func (ia *IrkenApp) IsDebugging() bool {
+	return ia.cs.IsDebugging()
+}
+
+func (ia *IrkenApp) ResetPing() {
+	if !ia.cs.IsConnected() {
+		return
+	}
+	ia.cs.ResetPing()
 }
 
 func handleFatalErr(err error) {
