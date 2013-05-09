@@ -226,6 +226,13 @@ func initHandlers(ia *IrkenApp) {
 		handleFatalErr(err)
 	}
 
+	ia.handlers["470"] = func(l *msg.Line) {
+		ia.DeleteChatWindow(l.Args()[1])
+		ia.AddChatWindow(l.Context())
+		err := ia.gui.WriteToChannel(l.Output(), l.Context())
+		handleFatalErr(err)
+	}
+
 	ia.handlers["CRAW"] = func(l *msg.Line) {
 		if !ia.cs.IsDebugging() {
 			err := ia.gui.WriteToChannel("/raw: Only available in debug mode",

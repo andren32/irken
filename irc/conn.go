@@ -45,7 +45,7 @@ func NewConn(addr string) (*Conn, error) {
 // It will wait until it gets one line of a string.
 func (c *Conn) Read() (string, error) {
 	data, err := c.io.ReadString('\n')
-	return strings.Replace(data, "\n", "", -1), err
+	return strings.Replace(data, "\r\n", "", -1), err
 }
 
 // Write attempts to write a string into the io buffer and

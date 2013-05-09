@@ -11,6 +11,7 @@ import (
 	"irken/client/parser_client"
 	"irken/client/parser_server"
 	"irken/irc"
+	"strings"
 	"time"
 )
 
@@ -171,6 +172,7 @@ func (cs *ConnectSession) CloseConnection() {
 
 func (cs *ConnectSession) debugPrint(s string) {
 	if cs.debug {
+		s = strings.Replace(s, "\001", "\\001", -1)
 		fmt.Println(s)
 	}
 }
