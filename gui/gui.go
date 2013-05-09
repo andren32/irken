@@ -149,8 +149,8 @@ func (gui *GUI) DeleteCurrentWindow() {
 func (gui *GUI) DeleteChannelWindow(context string) error {
 	len := gui.notebook.GetNPages()
 	for i := 0; i < len; i++ {
-		page := gui.notebook.GetNthPage(i)
-		if gui.notebook.GetTabLabelText(page) == context {
+		frame := gui.notebook.GetNthPage(i)
+		if gui.notebook.GetTabLabelText(frame) == context {
 			gui.notebook.RemovePage(nil, i)
 			gui.window.ShowAll()
 			return nil
@@ -172,6 +172,32 @@ func (gui *GUI) WriteToChannel(s, context string) error {
 	gui.AutoScroll(textBuffer, &endIter)
 	return nil
 }
+
+func (gui *GUI) WriteToCurrentWindow(s string) error {
+	var endIter gtk.TextIter
+	i := gui.notebook.GetCurrentPage()
+	frame := gui.notebook.GetNthPage(i)
+	labelText := gui.notebook.GetTabLabelText(frame)
+
+	var context string
+	if labelText == "Server" {
+		context = ""
+	} else {
+		context = labelText
+	}
+
+	page, ok := gui.pages[context]
+	if !ok {
+		return errors.New("WriteToChannel: No Such Window!")
+	}
+	textBuffer := page.textView.GetBuffer()
+	textBuffer.GetEndIter(&endIter)
+	textBuffer.Insert(&endIter, s+"\n")
+
+	gui.AutoScroll(textBuffer, &endIter)
+	return nil
+}
+
 func (gui *GUI) WriteToNicks(s, context string) error {
 	page, ok := gui.pages[context]
 	if !ok {
