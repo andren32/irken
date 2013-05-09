@@ -41,6 +41,7 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 
 	nick, _ := conf.GetCfgValue("nick")
 	realname, _ := conf.GetCfgValue("realname")
+
 	g := gui.NewGUI(DEFAULT_TITLE, wWidth, wHeight)
 	cs := client.NewConnectSession(nick, realname, debug)
 	ia := &IrkenApp{
@@ -66,6 +67,23 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 		g.EmptyEntryText("")
 	})
 	ia.BeginInput("")
+
+	// Settingsmenu stuff, for maximizing coolness of code this should maybe
+	// be it's own function or something like that
+	g.SetSettingsFunc(func() {
+		nick, _ := ia.conf.GetCfgValue("nick")
+		realname, _ := ia.conf.GetCfgValue("realname")
+		nickEntry := g.AddSetting("Default nick", nick)
+		realNameEntry :=g.AddSetting("Real name", realname)
+		g.AddSettingButton("Save", func() {
+			ia.conf.AddCfgValue("nick", nickEntry.GetText())
+			ia.conf.AddCfgValue("realname", realNameEntry.GetText())
+			ia.conf.Save()
+			cs.ChangeNick(nickEntry.GetText())
+			cs.ChangeRealName(realNameEntry.GetText())
+			g.CloseSettingsWindow()
+		})
+	})
 
 	err := g.WriteToChannel("Welcome to Irken!", DEFAULT_CONT)
 	handleFatalErr(err)

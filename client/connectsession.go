@@ -186,6 +186,10 @@ func (cs *ConnectSession) ChangeNick(nick string) {
 	cs.nick = nick
 }
 
+func (cs *ConnectSession) ChangeRealName(realName string) {
+	cs.realName = realName
+}
+
 func (cs *ConnectSession) IsDebugging() bool {
 	return cs.debug
 }
