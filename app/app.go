@@ -74,7 +74,7 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 		nick, _ := ia.conf.GetCfgValue("nick")
 		realname, _ := ia.conf.GetCfgValue("realname")
 		nickEntry := g.AddSetting("Default nick", nick)
-		realNameEntry :=g.AddSetting("Real name", realname)
+		realNameEntry := g.AddSetting("Real name", realname)
 		g.AddSettingButton("Save", func() {
 			ia.conf.AddCfgValue("nick", nickEntry.GetText())
 			ia.conf.AddCfgValue("realname", realNameEntry.GetText())
@@ -132,10 +132,10 @@ func (ia *IrkenApp) EndInput(context string) {
 	close(ia.activeChans[context])
 }
 
-func (ia *IrkenApp) UpdateNicks(context string) {
+func (ia *IrkenApp) UpdateNicks(context string) error {
 	channel, ok := ia.cs.IrcChannels[context]
 	if !ok {
-		handleFatalErr(errors.New("No such channel " + context))
+		return errors.New("UpdateNicks: No such channel " + context)
 	}
 	nicks := channel.Nicks
 
@@ -167,6 +167,8 @@ func (ia *IrkenApp) UpdateNicks(context string) {
 	for _, v := range allSorted {
 		ia.gui.WriteToNicks(v, context)
 	}
+
+	return nil
 }
 
 func (ia *IrkenApp) GUI() *gui.GUI {
@@ -241,7 +243,11 @@ func loadCfg(filename string) (c *client.Config, err error) {
 	return
 }
 
-func (ia *IrkenApp) AddChatWindow(context string) {
+func (ia *IrkenApp) AddChatWindow(context string) error {
+	if ia.HasChannel(context) {
+		return errors.New("AddChatWindow: Channel " + context + " already in use")
+	}
+
 	ia.cs.NewChannel(context)
 
 	ia.gui.CreateChannelWindow(context, func() {
@@ -259,12 +265,19 @@ func (ia *IrkenApp) AddChatWindow(context string) {
 	})
 	ia.BeginInput(context)
 	ia.gui.Notebook().NextPage()
+	return nil
 }
 
-func (ia *IrkenApp) DeleteChatWindow(context string) {
+func (ia *IrkenApp) DeleteChatWindow(context string) error {
+	if !ia.cs.ChannelExist(context) {
+		return errors.New("DeleteChatWindow: Channel " + context +
+			" doesn't exist")
+	}
+
 	ia.cs.DeleteChannel(context)
 	ia.EndInput(context)
 	ia.gui.DeleteChannelWindow(context)
+	return nil
 }
 
 func (ia *IrkenApp) HasConnection() bool {
@@ -301,7 +314,7 @@ func (ia *IrkenApp) CurrentWindowsContexts() []string {
 func (ia *IrkenApp) AddNicks(channel, nicks string) error {
 	ch, ok := ia.cs.IrcChannels[channel]
 	if !ok {
-		handleFatalErr(errors.New("No such channel " + channel + " registered"))
+		return errors.New("AddNicks: No such channel " + channel + " registered")
 	}
 	ch.AddNicks(nicks)
 	return nil
@@ -315,18 +328,19 @@ func (ia *IrkenApp) ChangeNick(channel, oldNick, newNick string) {
 	ch.ChangeNick(oldNick, newNick)
 }
 
-func (ia *IrkenApp) RemoveNick(channel, nick string) {
+func (ia *IrkenApp) RemoveNick(channel, nick string) error {
 	ch, ok := ia.cs.IrcChannels[channel]
 	if !ok {
-		handleFatalErr(errors.New("No such channel " + channel + " registered"))
+		return errors.New("RemoveNick: No such channel " + channel + " registered")
 	}
 	ch.RemoveNick(nick)
+	return nil
 }
 
 func (ia *IrkenApp) AddNewNick(channel, nick string) error {
 	ch, ok := ia.cs.IrcChannels[channel]
 	if !ok {
-		return errors.New("No such channel " + channel + " registered")
+		return errors.New("AddNewNick: No such channel " + channel + " registered")
 	}
 	ch.AddNick(nick, "")
 	return nil
