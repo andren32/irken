@@ -150,8 +150,8 @@ func initHandlers(ia *IrkenApp) {
 			if context != "" {
 				channel.RemoveNick(l.Nick())
 				ia.updateNicks(channel.Nicks, context)
+				ia.gui.WriteToChannel(l.Output(), context)
 			}
-			ia.gui.WriteToChannel(l.Output(), context)
 		}
 	}
 
