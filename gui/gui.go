@@ -146,6 +146,19 @@ func (gui *GUI) DeleteCurrentWindow() {
 	gui.window.ShowAll()
 }
 
+func (gui *GUI) DeleteChannelWindow(context string) error {
+	len := gui.notebook.GetNPages()
+	for i := 0; i < len; i++ {
+		page := gui.notebook.GetNthPage(i)
+		if page.GetLabel() == context {
+			gui.notebook.RemovePage(nil, page)
+			gui.window.ShowAll()
+			return nil
+		}
+	}
+	return errors.New("Context doesn't exist")
+}
+
 func (gui *GUI) WriteToChannel(s, context string) error {
 	var endIter gtk.TextIter
 	page, ok := gui.pages[context]
