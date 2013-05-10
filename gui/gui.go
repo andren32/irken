@@ -37,7 +37,7 @@ func NewGUI(title string, width, height int) *GUI {
 	window := gtk.NewWindow(gtk.WINDOW_TOPLEVEL)
 	window.SetPosition(gtk.WIN_POS_CENTER)
 	window.SetTitle(title)
-	window.SetIconName("gtk-dialog-info")
+	window.SetIconFromFile("icon/64.png")
 	window.Connect("destroy", func(ctx *glib.CallbackContext) {
 		println("got destroy!", ctx.Data().(string))
 		gtk.MainQuit()
