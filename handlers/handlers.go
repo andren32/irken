@@ -92,6 +92,12 @@ func Init(ia *app.IrkenApp) {
 		os.Exit(0)
 	})
 
+	ia.AddHandler("CNICK", func(l *msg.Line) {
+		if !ia.HasConnection() {
+			ia.GUI().WriteToCurrentWindow("/nick: Connect first!")
+		}
+	})
+
 	ia.AddHandler("353", func(l *msg.Line) { // nick list
 		err := ia.AddNicks(l.Context(), l.OutputMsg())
 		handleFatalErr(err)

@@ -204,6 +204,11 @@ func me(nick, context string, params []string) (out, pr string) {
 }
 
 func nickChange(nick string, params []string) (out, pr string) {
+	if len(params) == 0 {
+		out = ""
+		pr = "/nick: must supply new nick"
+		return
+	}
 	out = "NICK " + params[0]
 	pr = ""
 	return
