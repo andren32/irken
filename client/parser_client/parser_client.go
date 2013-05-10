@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
 )
 
 // lexClientMsg scans a line inputted by the user of the client and outputs
@@ -90,14 +91,14 @@ func Parse(message, nick, context string) (l *msg.Line,
 		out, pr = disconnect(nick, l.Args())
 	case "CPING":
 		out, pr = ping(nick, l.Args())
+	case "CHELP":
+		out, pr = "", "ShouldThisReallyBeNecessary?"
 	case "CSILENTPING":
 		out, pr = silentping(l.Args())
 	case "CSILENTPONG":
 		out, pr = silentpong(l.Args())
 	case "CRAW":
 		out, pr = raw(l.Args())
-	case "CHELP":
-		out, pr = "", ""
 	default:
 		out = ""
 		pr = "/" + strings.ToLower(l.Cmd()[1:]) + ": Unknown command"
@@ -114,7 +115,6 @@ func Parse(message, nick, context string) (l *msg.Line,
 	l.SetContext(context)
 	l.SetOutput(pr)
 	l.SetTime(time.Now())
-
 	return
 }
 

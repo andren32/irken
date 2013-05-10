@@ -269,8 +269,9 @@ func Init(ia *app.IrkenApp) {
 			} else {
 				out = v
 			}
-			ia.WriteToChatWindow(out, l.Context())
 		}
+
+		ia.WriteToChatWindow(out, l.Context())
 	})
 }
 
