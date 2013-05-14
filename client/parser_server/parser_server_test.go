@@ -245,17 +245,24 @@ func TestNicks(t *testing.T) {
 }
 
 func TestPing(t *testing.T) {
-	input := "PING :arg"
+	input := ":_mrx!blabla@haxxor.com PRIVMSG user :\001PING 1368528500 16889\001"
 	l, err := Parse(input)
 	if err != nil {
 		test.UnExpErr(t, err)
 	}
 	msg := l.OutputMsg()
+	cmd := l.Cmd()
 	cont := l.Context()
-	expCont := ""
-	expMsg := "Pinged: arg"
+	query := l.Args()[0]
+
+	expCmd := "CTCP"
+	expQuery := "PING"
+	expCont := "user"
+	expMsg := "1368528500 16889"
 	test.Check(t, cont, expCont)
 	test.Check(t, msg, expMsg)
+	test.Check(t, cmd, expCmd)
+	test.Check(t, query, expQuery)
 }
 
 func TestNoSuchTarget(t *testing.T) {
@@ -281,12 +288,16 @@ func TestAction(t *testing.T) {
 	msg := l.OutputMsg()
 	cmd := l.Cmd()
 	cont := l.Context()
-	expCmd := "PRIVMSG"
+	query := l.Args()[0]
+
+	expCmd := "CTCP"
+	expQuery := "ACTION"
 	expCont := "#chan"
 	expMsg := "*_mrx* is tired"
 	test.Check(t, cont, expCont)
 	test.Check(t, msg, expMsg)
 	test.Check(t, cmd, expCmd)
+	test.Check(t, query, expQuery)
 }
 
 func TestForwarding(t *testing.T) {

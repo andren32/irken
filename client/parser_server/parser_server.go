@@ -78,12 +78,53 @@ func Parse(message string) (l *msg.Line, err error) {
 	var context string
 	switch l.Cmd() {
 	case "NOTICE":
+		trail := l.Args()[len(l.Args())-1]
+		if strings.HasPrefix(trail, "\001") &&
+			strings.HasSuffix(trail, "\001") {
+			var query string
+			output, context, query = ctcp(l.Nick(), l.Args())
+
+			// create a new argument list to send to the handler
+			// the first argument describes what kind of query is
+			// being made
+			old := l.Args()
+			tmp := make([]string, len(old)+1)
+			tmp[0] = query
+			for i := range old {
+				tmp[i+1] = old[i]
+			}
+
+			l.SetArgs(tmp)
+			l.SetCmd("CTCP")
+			break
+		}
 		output, context = notice(l.Nick(), l.Args())
 	case "NICK":
 		output, context = nick(l.Nick(), l.Args())
 	case "MODE":
 		output, context = mode(l.Nick(), l.Args())
 	case "PRIVMSG":
+		trail := l.Args()[len(l.Args())-1]
+		if strings.HasPrefix(trail, "\001") &&
+			strings.HasSuffix(trail, "\001") {
+			var query string
+			output, context, query = ctcp(l.Nick(), l.Args())
+
+			// create a new argument list to send to the handler
+			// the first argument describes what kind of query is
+			// being made
+			old := l.Args()
+			tmp := make([]string, len(old)+1)
+			tmp[0] = query
+			for i := range old {
+				tmp[i+1] = old[i]
+			}
+
+			l.SetArgs(tmp)
+			l.SetCmd("CTCP")
+			break
+		}
+
 		output, context = privMsg(l.Nick(), l.Args())
 		r := "^\\W"
 		regex := regexp.MustCompile(r)
@@ -290,6 +331,26 @@ func forward(params []string) (output, context string) {
 
 	output = oldChan + " --> " + newChan + ": " + msg
 	context = newChan
+	return
+}
+
+func ctcp(nick string, params []string) (output, context, query string) {
+	context = params[0]
+	trail := params[len(params)-1]
+	queryEnd := strings.Index(trail, " ")
+	if queryEnd != -1 {
+		query = trail[1:queryEnd]
+	} else {
+		query = trail[1 : len(trail)-1]
+	}
+
+	if query == "ACTION" {
+		output = "*" + nick + "* " + trail[queryEnd+1:len(trail)-1]
+	}
+	if query == "PING" {
+		output = trail[queryEnd+1 : len(trail)-1]
+	}
+
 	return
 }
 

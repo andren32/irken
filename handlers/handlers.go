@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 	"runtime/debug"
+	"strconv"
+	"time"
 )
 
 func Init(ia *app.IrkenApp) {
@@ -225,6 +227,18 @@ func Init(ia *app.IrkenApp) {
 		ia.WriteToChatWindow(l.Output(), l.Context())
 	})
 
+	ia.AddHandler("CTCP", func(l *msg.Line) {
+		switch query := l.Args()[0]; query {
+		case "ACTION":
+			ia.WriteToChatWindow(l.Output(), l.Context())
+		case "PING":
+			// ctcp ping commonly uses Unix time in micro second resolution
+			uMicro := time.Now().UnixNano() / 1000
+			tmp := strconv.Itoa(int(uMicro))
+			ia.SendToCurrentServer("NOTICE " + l.Nick() + " :\001PING " + tmp[:10] + " " + tmp[10:] + "\001")
+		}
+	})
+
 	ia.AddHandler("CRAW", func(l *msg.Line) {
 		if !ia.IsDebugging() {
 			ia.WriteToChatWindow("/raw: Only available in debug mode",
@@ -251,15 +265,15 @@ func Init(ia *app.IrkenApp) {
 
 	ia.AddHandler("CHELP", func(l *msg.Line) {
 		c := make(map[string]string)
-		c["msg"] 	 	= "/msg <nick> <message> - Sends a private message to the person with the nick."
-		c["me"] 	 	= "/me <msg>             - Sends a message in the form of an action. For example: /me is hungry."
-		c["join"] 	 	= "/join <channel>       - Joins a channel"
-		c["nick"] 	 	= "/nick <nick>          - Changes your nickname"
-		c["part"] 	 	= "/part <?channel?>     - Leaves the channel. If no channel is specified you leave the current channel."
-		c["quit"] 	 	= "/quit <msg>           - Disconnects you from the server with a message (if specified)."
-		c["connect"] 	= "/connect <server>     - Connects you to the specified server."
+		c["msg"] = "/msg <nick> <message> - Sends a private message to the person with the nick."
+		c["me"] = "/me <msg>             - Sends a message in the form of an action. For example: /me is hungry."
+		c["join"] = "/join <channel>       - Joins a channel"
+		c["nick"] = "/nick <nick>          - Changes your nickname"
+		c["part"] = "/part <?channel?>     - Leaves the channel. If no channel is specified you leave the current channel."
+		c["quit"] = "/quit <msg>           - Disconnects you from the server with a message (if specified)."
+		c["connect"] = "/connect <server>     - Connects you to the specified server."
 		c["disconnect"] = "/disconnected         - Disconnects you from the server."
-		c["ping"] 		= "/ping <?nick?>        - Pings the user with the nick. If no nick is specified it pings the server."
+		c["ping"] = "/ping <?nick?>        - Pings the user with the nick. If no nick is specified it pings the server."
 
 		var out string
 
