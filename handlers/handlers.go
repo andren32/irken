@@ -250,34 +250,7 @@ func Init(ia *app.IrkenApp) {
 	})
 
 	ia.AddHandler("CHELP", func(l *msg.Line) {
-		c := make(map[string]string)
-		c["msg"] 	 	= "/msg <nick> <message> - Sends a private message to the person with the nick."
-		c["me"] 	 	= "/me <msg>             - Sends a message in the form of an action. For example: /me is hungry."
-		c["join"] 	 	= "/join <channel>       - Joins a channel"
-		c["nick"] 	 	= "/nick <nick>          - Changes your nickname"
-		c["part"] 	 	= "/part <?channel?>     - Leaves the channel. If no channel is specified you leave the current channel."
-		c["quit"] 	 	= "/quit <msg>           - Disconnects you from the server with a message (if specified)."
-		c["connect"] 	= "/connect <server>     - Connects you to the specified server."
-		c["disconnect"] = "/disconnected         - Disconnects you from the server."
-		c["ping"] 		= "/ping <?nick?>        - Pings the user with the nick. If no nick is specified it pings the server."
-
-		var out string
-
-		if len(l.Args()) == 0 {
-			for _, v := range c {
-				out = out + v + "\n"
-			}
-			out = out + "\nTyping /help <command> will give you information about the specified command only."
-		} else {
-			v, ok := c[l.Args()[0]]
-			if !ok {
-				out = "No such command."
-			} else {
-				out = v
-			}
-		}
-
-		ia.WriteToChatWindow(out, l.Context())
+		ia.WriteToChatWindow(l.OutputMsg(), l.Context())
 	})
 }
 
