@@ -85,17 +85,14 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 		})
 	})
 
-	err := g.WriteToChannel("Welcome to Irken!", DEFAULT_CONT)
-	handleFatalErr(err)
+	ia.WriteToChatWindow("Welcome to Irken!", DEFAULT_CONT)
 	if confErr != nil {
-		err := g.WriteToChannel("Cannot parse config file - using default values",
+		ia.WriteToChatWindow("Cannot parse config file - using default values",
 			DEFAULT_CONT)
-		handleFatalErr(err)
 	}
-	err = g.WriteToChannel("Nick is "+nick, DEFAULT_CONT)
-	handleFatalErr(err)
-	err = g.WriteToChannel("Real name is "+realname, DEFAULT_CONT)
-	handleFatalErr(err)
+	ia.WriteToChatWindow("For help type /help", DEFAULT_CONT)
+	ia.WriteToChatWindow("Nick is "+nick, DEFAULT_CONT)
+	ia.WriteToChatWindow("Real name is "+realname, DEFAULT_CONT)
 
 	return ia
 }
