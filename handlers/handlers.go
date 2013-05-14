@@ -128,10 +128,14 @@ func Init(ia *app.IrkenApp) {
 		}
 
 		for _, context := range ia.CurrentWindowsContexts() {
-			ia.ChangeNick(context, prevNick, newNick)
-			err := ia.UpdateNicks(context)
+			exist, err := ia.NickExist(context, prevNick) 
 			handleFatalErr(err)
-			ia.WriteToChatWindow(l.Output(), context)
+			if exist {
+				ia.ChangeNick(context, prevNick, newNick)
+				err := ia.UpdateNicks(context)
+				handleFatalErr(err)
+				ia.WriteToChatWindow(l.Output(), context)
+			}
 		}
 	})
 
@@ -141,9 +145,13 @@ func Init(ia *app.IrkenApp) {
 			return
 		}
 		for _, context := range ia.CurrentWindowsContexts() {
-			err := ia.RemoveNick(context, l.Nick())
+			exist, err := ia.NickExist(context, l.Nick())
 			handleFatalErr(err)
-			ia.WriteToChatWindow(l.Output(), context)
+			if exist {
+				err := ia.RemoveNick(context, l.Nick())
+				handleFatalErr(err)
+				ia.WriteToChatWindow(l.Output(), context)
+			}
 		}
 	})
 

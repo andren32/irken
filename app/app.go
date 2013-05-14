@@ -79,8 +79,10 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 			ia.conf.AddCfgValue("nick", nickEntry.GetText())
 			ia.conf.AddCfgValue("realname", realNameEntry.GetText())
 			ia.conf.Save()
-			cs.ChangeNick(nickEntry.GetText())
-			cs.ChangeRealName(realNameEntry.GetText())
+			if !ia.HasConnection() {
+				cs.ChangeNick(nickEntry.GetText())
+				cs.ChangeRealName(realNameEntry.GetText())
+			}
 			g.CloseSettingsWindow()
 		})
 	})
@@ -324,6 +326,18 @@ func (ia *IrkenApp) ChangeNick(channel, oldNick, newNick string) {
 		handleFatalErr(errors.New("No such channel " + channel + " registered"))
 	}
 	ch.ChangeNick(oldNick, newNick)
+
+	if oldNick == ia.cs.GetNick() {
+		ia.cs.ChangeNick(newNick)
+	}
+}
+
+func (ia *IrkenApp) NickExist(channel, nick string) (bool, error) {
+	ch, ok := ia.cs.IrcChannels[channel]
+	if !ok {
+		return false, errors.New("NickExist: No such channel" + channel + " registered.")
+	}
+	return ch.NickExist(nick), nil
 }
 
 func (ia *IrkenApp) RemoveNick(channel, nick string) error {
