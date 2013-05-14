@@ -1,10 +1,10 @@
-package client
+package conn
 
 import (
-	"irken/client/msg"
-	"strings"
+	"irken/backend/msg"
 	"regexp"
-	)
+	"strings"
+)
 
 // IRCChannel is a channel on the irc
 type IRCChannel struct {

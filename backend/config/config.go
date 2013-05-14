@@ -1,5 +1,5 @@
 // used to config different settings like standard nick
-package client
+package config
 
 import (
 	"bufio"

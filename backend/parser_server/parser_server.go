@@ -2,7 +2,7 @@ package parser_server
 
 import (
 	"errors"
-	"irken/client/msg"
+	"irken/backend/msg"
 	"regexp"
 	"strconv"
 	"strings"

@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"fmt"
-	"irken/app"
-	"irken/client/msg"
+	"irken/backend/msg"
+	"irken/frontend/app"
 	"log"
 	"os"
 	"runtime/debug"

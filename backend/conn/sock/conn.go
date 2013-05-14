@@ -1,5 +1,5 @@
 // irc descibes the basic client functionalities of irken
-package irc
+package sock
 
 import (
 	"bufio"

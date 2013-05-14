@@ -3,14 +3,14 @@
 // ready to be written to the screen.
 // Also stores the nick.
 // TODO: Add the methods used in app/app.go
-package client
+package conn
 
 import (
 	"fmt"
-	"irken/client/msg"
-	"irken/client/parser_client"
-	"irken/client/parser_server"
-	"irken/irc"
+	"irken/backend/conn/sock"
+	"irken/backend/msg"
+	"irken/backend/parser_client"
+	"irken/backend/parser_server"
 	"strings"
 	"time"
 )
@@ -21,7 +21,7 @@ type ConnectSession struct {
 	realName string
 	addr     string
 	// etc
-	Conn        *irc.Conn
+	Conn        *sock.Conn
 	IrcChannels map[string]*IRCChannel
 
 	pingFreq    time.Duration
@@ -45,21 +45,21 @@ func NewConnectSession(nick string, realName string, debug bool) *ConnectSession
 }
 
 func (cs *ConnectSession) Connect(addr string) error {
-	Conn, err := irc.NewConn(addr)
+	conn, err := sock.NewConn(addr)
 	if err != nil {
 		return err
 	}
 	// Register the user
-	err = Conn.Write("NICK " + cs.nick)
+	err = conn.Write("NICK " + cs.nick)
 	if err != nil {
 		return err
 	}
-	err = Conn.Write("USER " + cs.nick + " 0 * :" + cs.realName)
+	err = conn.Write("USER " + cs.nick + " 0 * :" + cs.realName)
 	if err != nil {
 		return err
 	}
 
-	cs.Conn = Conn
+	cs.Conn = conn
 	cs.connected = true
 	cs.addr = addr
 	cs.readToChannels()

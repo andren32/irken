@@ -3,8 +3,9 @@ package app
 import (
 	"errors"
 	"github.com/mattn/go-gtk/gdk"
-	"irken/client"
-	"irken/client/msg"
+	"irken/backend/config"
+	"irken/backend/conn"
+	"irken/backend/msg"
 	"irken/gui"
 	"log"
 	"os/user"
@@ -20,9 +21,9 @@ type Handler func(*msg.Line)
 
 type IrkenApp struct {
 	gui *gui.GUI
-	cs  *client.ConnectSession
+	cs  *conn.ConnectSession
 
-	conf *client.Config
+	conf *config.Config
 	// map from a command string to an action
 	handlers    map[string]Handler
 	activeChans map[string]chan struct{}
@@ -43,7 +44,7 @@ func NewIrkenApp(cfgPath string) *IrkenApp {
 	realname, _ := conf.GetCfgValue("realname")
 
 	g := gui.NewGUI(DEFAULT_TITLE, wWidth, wHeight)
-	cs := client.NewConnectSession(nick, realname, debug)
+	cs := conn.NewConnectSession(nick, realname, debug)
 	ia := &IrkenApp{
 		gui:         g,
 		cs:          cs,
@@ -193,8 +194,8 @@ func (ia *IrkenApp) Handle(l *msg.Line) (err error) {
 	return
 }
 
-func loadCfg(filename string) (c *client.Config, err error) {
-	c, err = client.NewConfig(filename)
+func loadCfg(filename string) (c *config.Config, err error) {
+	c, err = config.NewConfig(filename)
 	if !c.HasValue("nick") {
 		u, err := user.Current()
 		if err != nil {
