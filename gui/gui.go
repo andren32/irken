@@ -209,10 +209,12 @@ func (gui *GUI) WriteToNicks(s, context string) error {
 	if !ok {
 		return errors.New("WriteToChannel: No Such Window!")
 	}
-	var endIter gtk.TextIter
-	textBuffer := page.nickTV.GetBuffer()
-	textBuffer.GetEndIter(&endIter)
-	textBuffer.Insert(&endIter, s+"\n")
+	if page.nickTV != nil {
+		var endIter gtk.TextIter
+		textBuffer := page.nickTV.GetBuffer()
+		textBuffer.GetEndIter(&endIter)
+		textBuffer.Insert(&endIter, s+"\n")
+	}
 	return nil
 }
 
@@ -221,8 +223,10 @@ func (gui *GUI) EmptyNicks(context string) error {
 	if !ok {
 		return errors.New("WriteToChannel: No Such Window!")
 	}
-	textBuffer := page.nickTV.GetBuffer()
-	textBuffer.SetText("")
+	if page.nickTV != nil {
+		textBuffer := page.nickTV.GetBuffer()
+		textBuffer.SetText("")
+	}
 	return nil
 }
 

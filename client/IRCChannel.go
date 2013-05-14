@@ -38,6 +38,14 @@ func (ircch *IRCChannel) RemoveNick(nick string) {
 	delete(ircch.Nicks, nick)
 }
 
+func (ircch *IRCChannel) NickExist(nick string) bool {
+	_, ok := ircch.Nicks[nick]
+	if !ok {
+		return false
+	}
+	return true
+}
+
 // AddNick changes the permission of the nick.
 // Can also be used to change the nick
 func (ircch *IRCChannel) AddNick(nick, perm string) {
