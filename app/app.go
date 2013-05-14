@@ -268,6 +268,11 @@ func (ia *IrkenApp) AddChatWindow(context string) error {
 	return nil
 }
 
+func (ia *IrkenApp) WriteToCurrentWindow(s string) {
+	err := ia.gui.WriteToCurrentWindow(s)
+	handleFatalErr(err)
+}
+
 func (ia *IrkenApp) DeleteChatWindow(context string) error {
 	if !ia.cs.ChannelExist(context) {
 		return errors.New("DeleteChatWindow: Channel " + context +

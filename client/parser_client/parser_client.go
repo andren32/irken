@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-
 )
 
 // lexClientMsg scans a line inputted by the user of the client and outputs
@@ -102,6 +101,7 @@ func Parse(message, nick, context string) (l *msg.Line,
 	default:
 		out = ""
 		pr = "/" + strings.ToLower(l.Cmd()[1:]) + ": Unknown command"
+		l.SetCmd("CUNKNOWN")
 	}
 
 	if err != nil {
@@ -275,32 +275,32 @@ func concatArgs(args []string) string {
 }
 
 func help(args []string) string {
-		c := make(map[string]string)
-		c["msg"] 	 	= "/msg <nick> <message> - Sends a private message to the person with the nick."
-		c["me"] 	 	= "/me <msg>             - Sends a message in the form of an action. For example: /me is hungry."
-		c["join"] 	 	= "/join <channel>       - Joins a channel"
-		c["nick"] 	 	= "/nick <nick>          - Changes your nickname"
-		c["part"] 	 	= "/part <?channel?>     - Leaves the channel. If no channel is specified you leave the current channel."
-		c["quit"] 	 	= "/quit <msg>           - Disconnects you from the server with a message (if specified)."
-		c["connect"] 	= "/connect <server>     - Connects you to the specified server."
-		c["disconnect"] = "/disconnected         - Disconnects you from the server."
-		c["ping"] 		= "/ping <?nick?>        - Pings the user with the nick. If no nick is specified it pings the server."
+	c := make(map[string]string)
+	c["msg"] = "/msg <nick> <message> - Sends a private message to the person with the nick."
+	c["me"] = "/me <msg>             - Sends a message in the form of an action. For example: /me is hungry."
+	c["join"] = "/join <channel>       - Joins a channel"
+	c["nick"] = "/nick <nick>          - Changes your nickname"
+	c["part"] = "/part <?channel?>     - Leaves the channel. If no channel is specified you leave the current channel."
+	c["quit"] = "/quit <msg>           - Disconnects you from the server with a message (if specified)."
+	c["connect"] = "/connect <server>     - Connects you to the specified server."
+	c["disconnect"] = "/disconnected         - Disconnects you from the server."
+	c["ping"] = "/ping <?nick?>        - Pings the user with the nick. If no nick is specified it pings the server."
 
-		var out string
+	var out string
 
-		if len(args) == 0 {
-			for _, v := range c {
-				out = out + v + "\n"
-			}
-			out = out + "\nTyping /help <command> will give you information about the specified command only."
-		} else {
-			v, ok := c[args[0]]
-			if !ok {
-				out = "No such command."
-			} else {
-				out = v
-			}
+	if len(args) == 0 {
+		for _, v := range c {
+			out = out + v + "\n"
 		}
+		out = out + "\nTyping /help <command> will give you information about the specified command only."
+	} else {
+		v, ok := c[args[0]]
+		if !ok {
+			out = "No such command."
+		} else {
+			out = v
+		}
+	}
 
-		return out
+	return out
 }

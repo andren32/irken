@@ -12,6 +12,10 @@ import (
 )
 
 func Init(ia *app.IrkenApp) {
+	ia.AddHandler("CUNKNOWN", func(l *msg.Line) {
+		ia.WriteToCurrentWindow(l.OutputMsg())
+	})
+
 	ia.AddHandler("CCONNECT", func(l *msg.Line) {
 		if ia.HasConnection() {
 			ia.WriteToChatWindow("/connect: Disconnect first to connect to a new server", "")
@@ -128,7 +132,7 @@ func Init(ia *app.IrkenApp) {
 		}
 
 		for _, context := range ia.CurrentWindowsContexts() {
-			exist, err := ia.NickExist(context, prevNick) 
+			exist, err := ia.NickExist(context, prevNick)
 			handleFatalErr(err)
 			if exist {
 				ia.ChangeNick(context, prevNick, newNick)
@@ -247,6 +251,10 @@ func Init(ia *app.IrkenApp) {
 		}
 	})
 
+	ia.AddHandler("CHELP", func(l *msg.Line) {
+		ia.WriteToCurrentWindow(l.OutputMsg())
+	})
+
 	ia.AddHandler("CRAW", func(l *msg.Line) {
 		if !ia.IsDebugging() {
 			ia.WriteToChatWindow("/raw: Only available in debug mode",
@@ -270,7 +278,7 @@ func Init(ia *app.IrkenApp) {
 		ia.WriteToChatWindow(l.Output(),
 			l.Context())
 	})
-
+}
 
 func handleFatalErr(err error) {
 	if err != nil {
