@@ -1,8 +1,8 @@
 package main
 
 import (
-	"irken/app"
-	"irken/handlers"
+	"irken/frontend/app"
+	"irken/frontend/handlers"
 	"log"
 	"runtime"
 )
